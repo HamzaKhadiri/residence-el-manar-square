@@ -100,15 +100,13 @@ scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis
 # 1. تعريف الصلاحيات المطلوبة
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 
-# 2. قراءة البيانات من الـ Secrets كـ قاموس (Dictionary)
-# نقوم بتحويل st.secrets إلى dict ليتوافق مع مكتبة جوجل
+# قراءة الإعدادات من Secrets
 creds_dict = dict(st.secrets["gcp_service_account"])
 
-# 3. معالجة الـ private_key (خطوة حاسمة)
-# نقوم بتحويل النص المكتوب "\n" إلى سطر جديد حقيقي داخل المفتاح
+# خطوة هامة جداً: تحويل السطر الجديد المكتوب كنص إلى سطر برمجي حقيقي
 creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
 
-# 4. الاتصال بـ Google Sheets
+# اعتماد الاعتمادات (Credentials)
 creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
 
