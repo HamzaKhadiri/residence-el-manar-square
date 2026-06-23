@@ -92,12 +92,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+try:
+    st.write("### اختبار الربط بـ Secrets")
+    
+    # 1. واش Secrets كاينين؟
+    secrets_keys = list(st.secrets.keys())
+    st.write("Keys found:", secrets_keys)
+    
+    # 2. واش gcp_service_account موجود؟
+    if "gcp_service_account" in st.secrets:
+        st.success("✅ 'gcp_service_account' موجود في Secrets!")
+        
+        # 3. محاولة قراءة JSON
+        json_content = st.secrets["gcp_service_account"]["json"]
+        st.write("✅ تم العثور على محتوى JSON (طول النص):", len(json_content))
+        
+        # 4. محاولة تحويله لـ Dictionary
+        creds_dict = json.loads(json_content)
+        st.write("✅ تم تحويل JSON بنجاح إلى Dictionary!")
+        st.write("Project ID:", creds_dict.get("project_id"))
+    else:
+        st.error("❌ 'gcp_service_account' غير موجود في Secrets.")
 
-# قراءة البيانات من الـ Secrets (التي تأكدنا أنها تعمل الآن)
-creds_dict = json.loads(st.secrets["gcp_service_account"]["json"])
-creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-client = gspread.authorize(creds)
+except Exception as e:
+    st.error(f"❌ حدث خطأ أثناء الاختبار: {e}")
+
+st.stop() # هاد السطر كيحبس التطبيق باش يبان ليك غير الاختبار
 
 # فتح الجداول
 sheet_syndic = client.open("syndic_data").sheet1
