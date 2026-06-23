@@ -23,10 +23,15 @@ st.markdown("""
 @st.cache_resource
 def get_gspread_client():
     scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds_dict = dict(st.secrets["gcp_service_account"])
-    creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-    return gspread.authorize(creds)
+  creds_dict = dict(st.secrets["gcp_service_account"])
+
+# إعداد الصلاحيات
+scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+
+# الاتصال بـ Google Sheets
+# بما أننا استخدمنا """ في Secrets، المفتاح الآن بتنسيق صحيح ولن يحتاج لـ .replace()
+creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+client = gspread.authorize(creds)
 
 client = get_gspread_client()
 sheet_syndic = client.open("syndic_data").sheet1
