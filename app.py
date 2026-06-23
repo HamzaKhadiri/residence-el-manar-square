@@ -95,6 +95,10 @@ st.markdown("""
 # 2. إعداد الاتصال بـ Google Sheets عبر Secrets
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 
+# اختبار Secrets
+st.write("Secrets loaded:", list(st.secrets.keys()))
+st.stop()
+
 # قراءة مفاتيح الاتصال من إعدادات Streamlit
 creds_dict = json.loads(st.secrets["gcp_service_account"]["json"])
 creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
