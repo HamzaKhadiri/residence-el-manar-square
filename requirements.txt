@@ -1,5 +1,7 @@
 streamlit
 pandas
-openpyxl
 reportlab
 plotly
+gspread
+google-auth
+oauth2client
