@@ -92,17 +92,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. إعداد الاتصال بـ Google Sheets عبر Secrets
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 
-# اختبار Secrets
-st.write("Secrets loaded:", list(st.secrets.keys()))
-st.stop()
-
-# قراءة مفاتيح الاتصال من إعدادات Streamlit
+# قراءة البيانات من الـ Secrets (التي تأكدنا أنها تعمل الآن)
 creds_dict = json.loads(st.secrets["gcp_service_account"]["json"])
 creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
+
+# فتح الجداول
+sheet_syndic = client.open("syndic_data").sheet1
+sheet_expenses = client.open("expenses_data").sheet1
 
 # فتح الجداول
 sheet_syndic = client.open("syndic_data").sheet1
