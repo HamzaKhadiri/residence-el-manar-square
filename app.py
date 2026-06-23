@@ -108,9 +108,8 @@ try:
         st.write("✅ تم العثور على محتوى JSON (طول النص):", len(json_content))
         
         # 4. محاولة تحويله لـ Dictionary
-        creds_dict = json.loads(json_content)
-        st.write("✅ تم تحويل JSON بنجاح إلى Dictionary!")
-        st.write("Project ID:", creds_dict.get("project_id"))
+St.code(st.secrets["gcp_service_account"]["json"][:1000])
+st.stop()
     else:
         st.error("❌ 'gcp_service_account' غير موجود في Secrets.")
 
