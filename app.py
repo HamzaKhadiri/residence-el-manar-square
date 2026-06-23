@@ -91,10 +91,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. إعداد الاتصال بـ Google Sheets
-JSON_FILE = "residence-el-manar-square-24b94411ccf8.json"
+# 2. إعداد الاتصال بـ Google Sheets عبر Secrets
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file(JSON_FILE, scopes=scope)
+
+# قراءة مفاتيح الاتصال من إعدادات Streamlit
+creds_dict = json.loads(st.secrets["gcp_service_account"]["json"])
+creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
 
 # فتح الجداول
