@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import os
+import gspread
+from google.oauth2.service_account import Credentials
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -90,107 +91,44 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 3. إعدادات الأشهر والعمارات والسنوات
+# 2. إعداد الاتصال بـ Google Sheets
+JSON_FILE = "residence-el-manar-square-24b94411ccf8.json"
+scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+creds = Credentials.from_service_account_file(JSON_FILE, scopes=scope)
+client = gspread.authorize(creds)
+
+# فتح الجداول
+sheet_syndic = client.open("syndic_data").sheet1
+sheet_expenses = client.open("expenses_data").sheet1
+
+# 3. الدوال الأساسية (للتعامل مع Google Sheets)
+def load_data():
+    return pd.DataFrame(sheet_syndic.get_all_records())
+
+def save_data(df):
+    sheet_syndic.clear()
+    sheet_syndic.update([df.columns.tolist()] + df.fillna("").values.tolist())
+
+def load_expenses():
+    return pd.DataFrame(sheet_expenses.get_all_records())
+
+def save_expenses(df_expenses):
+    sheet_expenses.clear()
+    sheet_expenses.update([df_expenses.columns.tolist()] + df_expenses.fillna("").values.tolist())
+
+# 4. الثوابت
 months_cols = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
 immeubles_list = ["Imm A", "Imm B", "Imm C", "Imm D", "Imm E", "Imm F", "Imm G", "Bureau"]
 years_list = ["2025", "2026", "2027", "2028"]
 
-excel_file = "syndic_data.xlsx"
-expenses_file = "expenses_data.xlsx"
-
-# دالة جلب بيانات الاشتراكات وتصحيحها أوتوماتيكياً
-def load_data():
-    if os.path.exists(excel_file):
-        try:
-            df_existing = pd.read_excel(excel_file)
-            if "Année / السنة" not in df_existing.columns:
-                df_existing["Année / السنة"] = "2026"
-            for m in months_cols:
-                if m not in df_existing.columns:
-                    df_existing[m] = "Non Payé"
-            return df_existing
-        except:
-            pass
-    
-    all_rows = []
-    for imm in immeubles_list:
-        for i in range(1, 11):
-            row = {
-                "Immeuble / الإقامة": imm,
-                "Appartement / الشقة": f"N° {i}",
-                "Nom et prénom / الاسم الكامل": f"Résident {imm[-1]}-{i}",
-                          "Téléphone / الهاتف": f"060000000{i}" f"070000000{i}",
-                "Année / السنة": "2026"
-            }
-            for m in months_cols:
-                row[m] = "Non Payé"
-            all_rows.append(row)
-            
-            for y in ["2024", "2025", "2027", "2028"]:
-                row_y = row.copy()
-                row_y["Année / السنة"] = y
-                all_rows.append(row_y)
-                
-    df = pd.DataFrame(all_rows)
-    df.to_excel(excel_file, index=False)
-    return df
-
-# دالة ذكية ومصححة لجلب المصاريف وإضافة أعمدة السنة والشهر تلقائياً إذا كانت ناقصة
-def load_expenses():
-    if os.path.exists(expenses_file):
-        try:
-            df_exp = pd.read_excel(expenses_file)
-            
-            # إصلاح تلقائي إذا كانت الأعمدة ناقصة في الملف القديم
-            if "ANNEE" not in df_exp.columns or "MOIS" not in df_exp.columns:
-                annees = []
-                mois = []
-                for idx, row in df_exp.iterrows():
-                    try:
-                        date_str = str(row["DATE"])
-                        dt = pd.to_datetime(date_str, dayfirst=True)
-                        annees.append(str(dt.year))
-                        mois.append(str(dt.month))
-                    except:
-                        annees.append(str(datetime.now().year))
-                        mois.append(str(datetime.now().month))
-                df_exp["ANNEE"] = annees
-                df_exp["MOIS"] = mois
-                # حفظ التعديلات في الملف فوراً بعد الإصلاح
-                df_exp.to_excel(expenses_file, index=False)
-            return df_exp
-        except Exception as e:
-            st.error(f"Erreur lors du chargement des dépenses: {e}")
-            
-    # إنشاء الملف إذا لم يكن موجوداً
-    today = datetime.now() # تم تصحيح الاسم ليكون مطابقاً
-    data = {
-        "DATE": [today.strftime("%d/%m/%Y")],
-        "ANNEE": [str(today.year)],
-        "MOIS": [str(today.month)],
-        "MODE DE PAIEMENT": ["ESPECE"],
-        "CATEGORIE": ["Trésorerie initiale"],
-        "DESIGNATION": ["Trésorerie initiale"],
-        "DEPENSE": [0.0],
-    }
-    df = pd.DataFrame(data)
-    df.to_excel(expenses_file, index=False)
-    return df
+# تحميل البيانات
 df = load_data()
 df_expenses = load_expenses()
-excel_file = "syndic_data.xlsx"
-df_check = pd.read_excel(excel_file) if os.path.exists(excel_file) else pd.DataFrame()
- 
-# --- في كود تسجيل الدخول ---
-# 1. تهيئة الحالة الأساسية (يجب أن تكون دائماً في الأعلى)
+
+# 5. منطق تسجيل الدخول
 if "user_name" not in st.session_state:
     st.session_state.user_name = None
 
-# 2. تحميل البيانات
-# (قم بوضع دوال load_data و load_expenses هنا)
-df_check = pd.read_excel("syndic_data.xlsx") if os.path.exists("syndic_data.xlsx") else pd.DataFrame()
-
-# 3. منطق تسجيل الدخول
 if st.session_state.user_name is None:
     st.markdown("<h1 style='text-align: center;'>🔐 Résidence El Manar Square</h1>", unsafe_allow_html=True)
     input_name = st.text_input("أدخل اسمك الكامل / Entrez votre nom complet:")
@@ -199,22 +137,19 @@ if st.session_state.user_name is None:
         input_name_clean = input_name.strip().lower()
         input_parts = input_name_clean.split()
         
-        # --- حل مشكلة الـ float: تنظيف البيانات أولاً ---
-        # 1. تحويل العمود إلى نص 
-        # 2. استبدال القيم الفارغة (NaN/nan) بنص فارغ ""
-        df_check["Nom et prénom / الاسم الكامل"] = df_check["Nom et prénom / الاسم الكامل"].astype(str).replace('nan', '')
+        # جلب البيانات المحدثة عند محاولة الدخول
+        df = load_data() 
+        
+        # تنظيف البيانات للمقارنة
+        df["Nom_Clean"] = df["Nom et prénom / الاسم الكامل"].astype(str).str.strip().str.lower()
         
         found = False
         user_found = None
         
-        for name_in_db in df_check["Nom et prénom / الاسم الكامل"].tolist():
-            # تحويل اسم قاعدة البيانات لنص صغير قبل البحث
-            db_name_clean = str(name_in_db).strip().lower()
-            
-            # التحقق: هل كل أجزاء الاسم المدخل موجودة في الاسم الموجود في الإكسيل؟
-            if db_name_clean != "" and all(part in db_name_clean for part in input_parts):
+        for name_in_db in df["Nom_Clean"].tolist():
+            if name_in_db != "" and all(part in name_in_db for part in input_parts):
                 found = True
-                user_found = db_name_clean
+                user_found = name_in_db
                 break
         
         if input_name_clean == "admin":
@@ -227,7 +162,7 @@ if st.session_state.user_name is None:
             st.error("الاسم غير موجود أو خطأ في الكتابة!")
     st.stop() # إيقاف الكود هنا إذا لم يسجل المستخدم دخوله
 
-# 4. بعد تسجيل الدخول، يمكننا الآن تعريف صلاحية الأدمن
+# 6. تعريف صلاحية الأدمن (هاد السطر هو اللي كيمنع ظهور خطأ NameError)
 is_admin = (st.session_state.user_name == "Admin")
 
 # --- 5. البانر وزر الخروج ---
