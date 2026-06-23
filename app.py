@@ -112,12 +112,6 @@ creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
 creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
 
-creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-
-# الاتصال بـ Google Sheets
-creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-client = gspread.authorize(creds)
-
 # فتح الجداول
 sheet_syndic = client.open("syndic_data").sheet1
 sheet_expenses = client.open("expenses_data").sheet1
