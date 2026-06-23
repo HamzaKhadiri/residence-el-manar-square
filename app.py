@@ -93,20 +93,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # قراءة البيانات مباشرة من الـ Secrets كقاموس (Dictionary)
-creds_dict = st.secrets["gcp_service_account"]
-
+# إعداد الصلاحيات
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 
-# 1. تعريف الصلاحيات المطلوبة
-scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-
-# قراءة الإعدادات من Secrets
+# قراءة الإعدادات
 creds_dict = dict(st.secrets["gcp_service_account"])
 
-# خطوة هامة جداً: تحويل السطر الجديد المكتوب كنص إلى سطر برمجي حقيقي
+# خطوة هامة: تنظيف المفتاح
 creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
 
-# اعتماد الاعتمادات (Credentials)
+# الاتصال بـ Google Sheets
 creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
 
