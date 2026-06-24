@@ -1,7 +1,5 @@
 streamlit
 pandas
-reportlab
+supabase
 plotly
-gspread
-google-auth
-oauth2client
+reportlab
