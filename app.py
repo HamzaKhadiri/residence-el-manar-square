@@ -8,6 +8,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from supabase import create_client
 
+supabase = create_client(
+   st.secrets["SUPABASE_URL"],
+   st.secrets["SUPABASE_KEY"]
+)
 # 1. إعدادات الصفحة الأولى
 st.set_page_config(page_title="Résidence El Manar Square", page_icon="🏢", layout="wide")
 
