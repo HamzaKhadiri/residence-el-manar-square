@@ -1,8 +1,4 @@
 streamlit
 pandas
-reportlab
-plotly
-gspread
-google-auth
-oauth2client
+openpyxl
 subabase
