@@ -451,7 +451,7 @@ elif st.session_state.current_page == "Trésorerie":
             libelle = st.text_input("Libellé")
         with c3: 
           if st.button("✔️ Ajouter", use_container_width=True):
-    if libelle and montant > 0:
+          if libelle and montant > 0:
         new_exp = {
             "date": date.strftime("%d/%m/%Y"),
             "annee": str(tres_year),
