@@ -450,21 +450,26 @@ elif st.session_state.current_page == "Trésorerie":
             date = st.date_input("Date")
             libelle = st.text_input("Libellé")
         with c3: 
-            montant = st.number_input("Montant", min_value=0.0, step=50.0)
-            if st.button("✔️ Ajouter", use_container_width=True):
-                if libelle and montant > 0:
-                    new_exp = {
-                        "date": date.strftime("%d/%m/%Y"),
-                        "annee": str(tres_year),
-                        "mois": str(tres_month_num),
-                        "mode_de_paiement": mode,
-                        "categorie": cat.upper(),
-                        "designation": libelle,
-                        "depense": float(montant)
-                    }
-                    supabase.table("expenses").insert(new_exp).execute()
-                    st.success("✔️ Ajouté à Supabase!"); st.rerun()
-
+          if st.button("✔️ Ajouter", use_container_width=True):
+    if libelle and montant > 0:
+        new_exp = {
+            "date": date.strftime("%d/%m/%Y"),
+            "annee": str(tres_year),
+            "mois": str(tres_month_num),
+            "mode_de_paiement": mode,
+            "categorie": cat.upper(),
+            "designation": libelle,
+            "depense": float(montant)
+        }
+        
+        # محاولة الإضافة مع التقاط الخطأ بالتفصيل
+        try:
+            response = supabase.table("expenses").insert(new_exp).execute()
+            st.success("✔️ Ajouté à Supabase!")
+            st.rerun()
+        except Exception as e:
+            # هنا ستظهر الرسالة الحقيقية من قاعدة البيانات
+            st.error(f"Erreur Supabase: {e}")
         st.markdown("### 📋 Opérations")
         df_display = df_exp_month.copy()
         if not df_display.empty:
