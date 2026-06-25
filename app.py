@@ -295,7 +295,7 @@ elif st.session_state.current_page == "Cotisations":
         return val
 
     # --- الجزء الخاص بالأدمن ---
-if is_admin:
+    if is_admin:
 
     row1, row2 = st.columns(2), st.columns(2)
 
@@ -448,12 +448,11 @@ if is_admin:
                 st.error(f"Erreur : {e}")
 
     # --- الجزء الخاص بالساكن ---
-else:
+    else:
 
            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-user_name = st.session_state.get("user_name", "")
-
-df_user_cotis = df[
+            user_name = st.session_state.get("user_name", "")
+            df_user_cotis = df[
         df["Nom et prénom / الاسم الكامل"]
         .str.contains(user_name, case=False, na=False)
     ].copy()
