@@ -167,17 +167,6 @@ def load_expenses():
 
         if response.data:
             df_exp = pd.DataFrame(response.data)
-
-            df_exp = df_exp.rename(columns={
-                "date": "DATE",
-                "annee": "ANNEE",
-                "mois": "MOIS",
-                "mode_de_paiement": "MODE DE PAIEMENT",
-                "categorie": "CATEGORIE",
-                "designation": "DESIGNATION",
-                "depense": "DEPENSE"
-            })
-
             return df_exp
 
         return pd.DataFrame(columns=[
