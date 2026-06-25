@@ -449,7 +449,7 @@ elif st.session_state.current_page == "Trésorerie":
             df_display["recette"] = 0.0
             df_display["date"] = pd.to_datetime(df_display["date"], errors="coerce", dayfirst=True)
             df_display = df_display.sort_values("date", ascending=False)
-            df_display["date"] = df_display["date"].dt.strftime("%Y/%m/%d")
+            df_display["date"] = df_display["date"].dt.strftime("%Y-%m-%d")
             resume = pd.DataFrame([{"date": "", "mode_de_paiement": "", "categorie": "RÉSUMÉ", "designation": "🟢 TOTAL recetteS", "depense": 0, "recette": total_recette_month}])
             df_final = pd.concat([resume, df_display], ignore_index=True)
             st.dataframe(df_final, use_container_width=True, hide_index=True)
