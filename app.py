@@ -451,9 +451,9 @@ if is_admin:
 else:
 
            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
- user_name = st.session_state.get("user_name", "")
+user_name = st.session_state.get("user_name", "")
 
- df_user_cotis = df[
+df_user_cotis = df[
         df["Nom et prénom / الاسم الكامل"]
         .str.contains(user_name, case=False, na=False)
     ].copy()
