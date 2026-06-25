@@ -392,7 +392,6 @@ elif st.session_state.current_page == "Cotisations":
 
             except Exception as e:
                 st.error(f"Erreur : {e}") 
-هاكا مزيان
 
     # --- الجزء الخاص بالساكن ---
     else:
