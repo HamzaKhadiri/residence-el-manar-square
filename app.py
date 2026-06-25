@@ -362,21 +362,7 @@ elif st.session_state.current_page == "Cotisations":
                     st.error(f"Erreur : {e}")
 
     # --- الجزء الخاص بالساكن ---
-        else:
-            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-            user_name = st.session_state.get("user_name", "")
-            df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
-            if df_user_cotis.empty:
-            st.info("لم يتم العثور على بيانات خاصة بك.")
     else:
-            cols_user = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Année / السنة"] + months_cols
-            df_user_cotis = df_user_cotis[cols_user]
-            for month in months_cols:
-                if month in df_user_cotis.columns:
-                    df_user_cotis[month] = df_user_cotis[month].apply(lambda x: '✅' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌')
-            st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
-    # --- الجزء الخاص بالساكن ---
-else:
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
         user_name = st.session_state.get("user_name", "")
         df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
@@ -388,9 +374,8 @@ else:
             df_user_cotis = df_user_cotis[cols_user]
             for month in months_cols:
                 if month in df_user_cotis.columns:
-                    df_user_cotis[month] = df_user_cotis[month].apply(format_payment)
+                    df_user_cotis[month] = df_user_cotis[month].apply(lambda x: '✅' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌')
             st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
-
 
 # --- صفحة الخزينة ---
 elif st.session_state.current_page == "Trésorerie":
