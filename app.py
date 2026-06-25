@@ -295,10 +295,8 @@ elif st.session_state.current_page == "Cotisations":
         return val
 
     # --- الجزء الخاص بالأدمن ---
-   if is_admin:
-
+if is_admin:
      row1, row2 = st.columns(2), st.columns(2)
-
     with row1[0]:
         selected_year = st.selectbox(
             "Année / السنة",
