@@ -341,8 +341,7 @@ elif st.session_state.current_page == "Cotisations":
                 },
                 disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
             )
-            if st.button(
-            "💾 Enregistrer les modifications",
+            if st.button("💾 Enregistrer les modifications",
             use_container_width=True
             ):
                 month_map = {
