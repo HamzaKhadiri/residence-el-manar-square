@@ -367,9 +367,7 @@ elif st.session_state.current_page == "Cotisations":
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erreur : {e}")
-
-    # --- الجزء الخاص بالساكن ---
-    else:
+            else:
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
         user_name = st.session_state.get("user_name", "")
         df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
