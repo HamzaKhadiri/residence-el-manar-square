@@ -314,19 +314,33 @@ elif st.session_state.current_page == "Cotisations":
 
     if is_admin:
         # --- الفلاتر ---
+# --- الفلاتر (استخدمي الأسماء الجديدة) ---
         row1, row2 = st.columns(2), st.columns(2)
         
-        with row1[0]: selected_year = st.selectbox("Année / السنة", sorted(df["annee"].unique()))
+        # استخدمي الاسم الذي ظهر في القائمة "Année / السنة"
+        with row1[0]: 
+            selected_year = st.selectbox("Année / السنة", sorted(df["Année / السنة"].unique()))
+            
         with row1[1]:
             months_list = ["الكل"] + months_cols
             selected_month = st.selectbox("Mois / الشهر", months_list)
         
         with row2[0]: 
-            selected_imm = st.selectbox("Immeuble / العمارة", sorted(df["immeuble"].unique()))
+            # استخدمي الاسم الجديد "Immeuble / الإقامة"
+            selected_imm = st.selectbox("Immeuble / الإقامة", sorted(df["Immeuble / الإقامة"].unique()))
+            
         with row2[1]:
-            filtered_apparts = df[df["immeuble"] == selected_imm]["appartement"].unique().tolist()
+            # تأكدي من استخدام الأسماء الجديدة هنا أيضاً
+            filtered_apparts = df[df["Immeuble / الإقامة"] == selected_imm]["Appartement / الشقة"].unique().tolist()
             apparts_in_imm = ["الكل"] + sorted(filtered_apparts)
             selected_appart = st.selectbox("Appartement / الشقة", apparts_in_imm)
+            
+        st.markdown("---")
+        
+        # --- الفلترة (تعديل الـ mask) ---
+        mask = (df["Année / السنة"].astype(str) == str(selected_year)) & (df["Immeuble / الإقامة"] == selected_imm)
+        if selected_appart != "الكل":
+            mask &= (df["Appartement / الشقة"] == selected_appart)
             
         st.markdown("---")
         
