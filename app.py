@@ -458,9 +458,9 @@ df_user_cotis = df[
         .str.contains(user_name, case=False, na=False)
     ].copy()
 
-    if df_user_cotis.empty:
+if df_user_cotis.empty:
         st.info("لم يتم العثور على بيانات خاصة بك.")
-    else:
+else:
 
         cols_user = [
             "Immeuble / الإقامة",
