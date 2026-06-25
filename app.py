@@ -299,11 +299,21 @@ elif st.session_state.current_page == "Cotisations":
     st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")        
     
     # تنظيف البيانات
+# تنظيف البيانات
     df_clean = df.copy()
-    df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
-    df_clean["immeuble"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
-    df_clean["appartement"] = df_clean["appartement"].astype(str).str.strip()
-    df_clean["nom_complet"] = df_clean["nom_complet"].astype(str).str.strip()
+    
+    # --- إضافة سطر للتصحيح (Debug) ---
+    st.write("أسماء الأعمدة المتاحة هي:", df_clean.columns.tolist())
+    # --------------------------------
+    
+    # تأكدي أن الأسماء هنا تطابق تماماً ما سيظهر لك في التطبيق
+    if 'annee' in df_clean.columns:
+        df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
+    
+    if 'immeuble' in df_clean.columns:
+        df_clean["immeuble"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
+    
+    # ... وباقي الأعمدة
 
     if is_admin:
         # --- الفلاتر ---
