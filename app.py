@@ -306,31 +306,39 @@ elif st.session_state.current_page == "Cotisations":
     df_clean["Appartement / الشقة"] = df_clean["Appartement / الشقة"].astype(str).str.strip()
     df_clean["Nom et prénom / الاسم الكامل"] = df_clean["Nom et prénom / الاسم الكامل"].astype(str).str.strip()
 
-    if is_admin:
+if is_admin:
         # --- الفلاتر ---
         row1, row2 = st.columns(2), st.columns(2)
         
+        # استخدام أسماء الأعمدة الحقيقية من Supabase
         with row1[0]: selected_year = st.selectbox("Année / السنة", years_list)
         with row1[1]:
             months_list = ["الكل"] + months_cols
             selected_month = st.selectbox("Mois / الشهر", months_list)
-        with row2[0]: selected_imm = st.selectbox("Immeuble / العمارة", immeubles_list)
+        
+        # التأكد من جلب القوائم من الأعمدة الصحيحة
+        with row2[0]: 
+            # هنا كنستخدموا العمود الحقيقي "immeuble"
+            selected_imm = st.selectbox("Immeuble / العمارة", sorted(df["immeuble"].unique()))
         with row2[1]:
-            filtered_apparts = df_clean[df_clean["Immeuble / الإقامة"] == str(selected_imm).upper()]["Appartement / الشقة"].unique().tolist()
+            # هنا كنستخدموا العمود الحقيقي "appartement"
+            filtered_apparts = df[df["immeuble"] == selected_imm]["appartement"].unique().tolist()
             apparts_in_imm = ["الكل"] + sorted(filtered_apparts)
             selected_appart = st.selectbox("Appartement / الشقة", apparts_in_imm)
-                
+            
         st.markdown("---")
         
-        # --- الفلترة ---
-        mask = (df_clean["Année / السنة"] == str(selected_year)) & (df_clean["Immeuble / الإقامة"] == str(selected_imm).upper())
+        # --- الفلترة باستخدام أسماء الأعمدة الحقيقية ---
+        # لاحظي استخدمنا "annee" و "immeuble" و "appartement"
+        mask = (df["annee"].astype(str) == str(selected_year)) & (df["immeuble"] == selected_imm)
+        
         if selected_appart != "الكل":
-            mask &= (df_clean["Appartement / الشقة"] == str(selected_appart))
-                
-        df_filtered = df_clean[mask].copy()
+            mask &= (df["appartement"] == selected_appart)
+            
+        df_filtered = df[mask].copy()
         
         if df_filtered.empty:
-            st.warning("لا توجد بيانات تطابق المعايير المختارة.")
+            st.warning(f"لا توجد بيانات تطابق: السنة {selected_year} والعمارة {selected_imm}")
         else:
             # --- عرض البيانات ---
             cols_to_display = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
