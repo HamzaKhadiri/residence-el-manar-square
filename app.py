@@ -372,7 +372,7 @@ if is_admin:
                df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
         
             if df_user_cotis.empty:
-            st.info("لم يتم العثور على بيانات خاصة بك، المرجو مراجعة المسؤول.")
+              st.info("لم يتم العثور على بيانات خاصة بك، المرجو مراجعة المسؤول.")
             else:
                for month in months_cols:
                  if month in df_user_cotis.columns:
