@@ -300,10 +300,10 @@ elif st.session_state.current_page == "Cotisations":
     
     # تنظيف البيانات
     df_clean = df.copy()
-    df_clean["Année / السنة"] = df_clean["annee"].astype(str).str.strip()
-    df_clean["Immeuble / الإقامة"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
-    df_clean["Appartement / الشقة"] = df_clean["appartement"].astype(str).str.strip()
-    df_clean["Nom et prénom / الاسم الكامل"] = df_clean["nom_complet"].astype(str).str.strip()
+    df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
+    df_clean["immeuble"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
+    df_clean["appartement"] = df_clean["appartement"].astype(str).str.strip()
+    df_clean["nom_complet"] = df_clean["nom_complet"].astype(str).str.strip()
 
     if is_admin:
         # --- الفلاتر ---
