@@ -319,28 +319,20 @@ elif st.session_state.current_page == "Cotisations":
             cols_to_display = ["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"] + (months_cols if selected_month == "الكل" else [selected_month])
             df_display = df_filtered[cols_to_display].copy()
 
+            # تحويل القيم لرموز للعرض في الـ data_editor
             for month in months_cols:
                 if month in df_display.columns:
-                    df_display[month] = df_display[month].replace("PAYÉ", "PAYE").fillna("NON_PAYE")
+                    df_display[month] = df_display[month].apply(lambda x: '✅ PAYE' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌ NON_PAYE')
 
-            # 1. جدول العرض السريع (بالرموز)
-            st.write("#### 📊 وضعية الاشتراكات (للاطلاع):")
-            df_view = df_display.copy()
-            for month in months_cols:
-                if month in df_view.columns:
-                    df_view[month] = df_view[month].apply(lambda x: '✅' if str(x).upper() == 'PAYE' else '❌')
-            st.dataframe(df_view, use_container_width=True, hide_index=True)
-
-            st.write("---")
-            st.write("#### ✍️ التعديل (للأدمن):")
-
-            # 2. جدول التعديل (بالكلمات لـ Supabase)
             edited_df = st.data_editor(
                 df_display,
                 hide_index=True,
                 use_container_width=True,
                 column_config={
-                    month: st.column_config.SelectboxColumn(month, options=["PAYE", "NON_PAYE"])
+                    month: st.column_config.SelectboxColumn(
+                        month, 
+                        options=["✅ PAYE", "❌ NON_PAYE"]
+                    )
                     for month in months_cols if month in df_display.columns
                 },
                 disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
@@ -359,18 +351,21 @@ elif st.session_state.current_page == "Cotisations":
                         updates = {}
                         for month_fr, month_db in month_map.items():
                             if month_fr in edited_df.columns:
-                                value = str(row[month_fr]).strip()
-                                updates[month_db] = "PAYE" if value == "PAYE" else "NON_PAYE"
+                                val = str(row[month_fr]).strip()
+                                # استخراج القيمة الأساسية (PAYE أو NON_PAYE) من النص المرمز
+                                updates[month_db] = "PAYE" if "PAYE" in val else "NON_PAYE"
                         if updates:
                             supabase.table("residents").update(updates).eq("id", resident_id).execute()
                     st.success("✅ Modifications enregistrées avec succès")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erreur : {e}")
-            else:
-                st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-                user_name = st.session_state.get("user_name", "")
-                df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
+
+    # --- الجزء الخاص بالساكن ---
+    else:
+        st.write("### 📋 وضعية اشتراكاتك الخاصة:")
+        user_name = st.session_state.get("user_name", "")
+        df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
 
         if df_user_cotis.empty:
             st.info("لم يتم العثور على بيانات خاصة بك.")
@@ -381,7 +376,6 @@ elif st.session_state.current_page == "Cotisations":
                 if month in df_user_cotis.columns:
                     df_user_cotis[month] = df_user_cotis[month].apply(lambda x: '✅' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌')
             st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
-
     # --- الجزء الخاص بالساكن ---
     else:
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
