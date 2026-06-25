@@ -448,7 +448,7 @@ if is_admin:
                 st.error(f"Erreur : {e}")
 
     # --- الجزء الخاص بالساكن ---
-        Else:
+        else:
 
     st.write("### 📋 وضعية اشتراكاتك الخاصة:")
 
