@@ -290,22 +290,14 @@ if st.session_state.current_page == "Tableau de bord":
 elif st.session_state.current_page == "Cotisations":
     st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")
 
-    def format_payment(val):
-        val_str = str(val).strip().upper()
-        if val_str in ['PAYE', 'PAYÉ']: return '✅'
-        if val_str == 'NON_PAYE': return '❌'
-        return val
-
     # --- الجزء الخاص بالأدمن ---
     if is_admin:
         row1, row2 = st.columns(2), st.columns(2)
-
         with row1[0]:
             selected_year = st.selectbox("Année / السنة", sorted(df["Année / السنة"].unique()))
         with row1[1]:
             months_list = ["الكل"] + months_cols
             selected_month = st.selectbox("Mois / الشهر", months_list)
-
         with row2[0]:
             selected_imm = st.selectbox("Immeuble / الإقامة", sorted(df["Immeuble / الإقامة"].unique()))
         with row2[1]:
@@ -331,6 +323,18 @@ elif st.session_state.current_page == "Cotisations":
                 if month in df_display.columns:
                     df_display[month] = df_display[month].replace("PAYÉ", "PAYE").fillna("NON_PAYE")
 
+            # 1. جدول العرض السريع (بالرموز)
+            st.write("#### 📊 وضعية الاشتراكات (للاطلاع):")
+            df_view = df_display.copy()
+            for month in months_cols:
+                if month in df_view.columns:
+                    df_view[month] = df_view[month].apply(lambda x: '✅' if str(x).upper() == 'PAYE' else '❌')
+            st.dataframe(df_view, use_container_width=True, hide_index=True)
+
+            st.write("---")
+            st.write("#### ✍️ التعديل (للأدمن):")
+
+            # 2. جدول التعديل (بالكلمات لـ Supabase)
             edited_df = st.data_editor(
                 df_display,
                 hide_index=True,
@@ -341,56 +345,44 @@ elif st.session_state.current_page == "Cotisations":
                 },
                 disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
             )
-            if st.button("💾 Enregistrer les modifications",
-            use_container_width=True
-            ):
+
+            if st.button("💾 Enregistrer les modifications", use_container_width=True):
                 month_map = {
-                "Janvier": "janvier",
-                "Février": "fevrier",
-                "Mars": "mars",
-                "Avril": "avril",
-                "Mai": "mai",
-                "Juin": "juin",
-                "Juillet": "juillet",
-                "Août": "aout",
-                "Septembre": "septembre",
-                "Octobre": "octobre",
-                "Novembre": "novembre",
-                "Décembre": "decembre"
-            }
+                    "Janvier": "janvier", "Février": "fevrier", "Mars": "mars",
+                    "Avril": "avril", "Mai": "mai", "Juin": "juin",
+                    "Juillet": "juillet", "Août": "aout", "Septembre": "septembre",
+                    "Octobre": "octobre", "Novembre": "novembre", "Décembre": "decembre"
+                }
+                try:
+                    for _, row in edited_df.iterrows():
+                        resident_id = row["id"]
+                        updates = {}
+                        for month_fr, month_db in month_map.items():
+                            if month_fr in edited_df.columns:
+                                value = str(row[month_fr]).strip()
+                                updates[month_db] = "PAYE" if value == "PAYE" else "NON_PAYE"
+                        if updates:
+                            supabase.table("residents").update(updates).eq("id", resident_id).execute()
+                    st.success("✅ Modifications enregistrées avec succès")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Erreur : {e}")
 
-            try:
+    # --- الجزء الخاص بالساكن ---
+    else:
+        st.write("### 📋 وضعية اشتراكاتك الخاصة:")
+        user_name = st.session_state.get("user_name", "")
+        df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
 
-                for _, row in edited_df.iterrows():
-
-                    resident_id = row["id"]
-
-                    updates = {}
-
-                    for month_fr, month_db in month_map.items():
-
-                        if month_fr in edited_df.columns:
-
-                            value = str(row[month_fr]).strip()
-
-                            if value == "PAYE":
-                                updates[month_db] = "PAYE"
-                            else:
-                                updates[month_db] = "NON_PAYE"
-
-                    if updates:
-
-                        supabase.table("residents") \
-                            .update(updates) \
-                            .eq("id", resident_id) \
-                            .execute()
-
-                st.success("✅ Modifications enregistrées avec succès")
-                st.rerun()
-
-            except Exception as e:
-                st.error(f"Erreur : {e}") 
-
+        if df_user_cotis.empty:
+            st.info("لم يتم العثور على بيانات خاصة بك.")
+        else:
+            cols_user = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Année / السنة"] + months_cols
+            df_user_cotis = df_user_cotis[cols_user]
+            for month in months_cols:
+                if month in df_user_cotis.columns:
+                    df_user_cotis[month] = df_user_cotis[month].apply(lambda x: '✅' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌')
+            st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
 
     # --- الجزء الخاص بالساكن ---
     else:
