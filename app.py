@@ -341,45 +341,58 @@ elif st.session_state.current_page == "Cotisations":
                 },
                 disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
             )
-        if st.button("💾 Enregistrer les modifications", use_container_width=True):
-    
-    # 1. تأكدي أن هذه الأسماء مطابقة 100% لما يظهر في جدولك
-    # إذا كان الجدول يظهر "Janvier / يناير"، يجب أن يكون المفتاح هنا كذلك
+        if st.button(
+            "💾 Enregistrer les modifications",
+            use_container_width=True
+        ):
+
             month_map = {
-                "Janvier / يناير": "janvier",
-                "Février / فبراير": "fevrier",
-                "Mars / مارس": "mars",
-                "Avril / أبريل": "avril",
-                "Mai / مايو": "mai",
-                "Juin / يونيو": "juin",
-                "Juillet / يوليو": "juillet",
-                "Août / أغسطس": "aout",
-                "Septembre / سبتمبر": "septembre",
-                "Octobre / أكتوبر": "octobre",
-                "Novembre / نوفمبر": "novembre",
-                "Décembre / ديسمبر": "decembre"
+                "Janvier": "janvier",
+                "Février": "fevrier",
+                "Mars": "mars",
+                "Avril": "avril",
+                "Mai": "mai",
+                "Juin": "juin",
+                "Juillet": "juillet",
+                "Août": "aout",
+                "Septembre": "septembre",
+                "Octobre": "octobre",
+                "Novembre": "novembre",
+                "Décembre": "decembre"
             }
 
-    try:
-        for _, row in edited_df.iterrows():
-            resident_id = row["id"]
-            updates = {}
-            
-            for month_fr, month_db in month_map.items():
-                # التحقق: هل هذا العمود موجود في الجدول المعروض؟
-                if month_fr in edited_df.columns:
-                    value = str(row[month_fr]).strip()
-                    # إضافة القيمة للتحديث
-                    updates[month_db] = "PAYE" if value == "PAYE" else "NON_PAYE"
-            
-            if updates:
-                # إرسال التحديث لـ Supabase
-                supabase.table("residents").update(updates).eq("id", resident_id).execute()
-        
-        st.success("✅ Modifications enregistrées avec succès")
-        st.rerun()
-    except Exception as e:
-        st.error(f"Erreur technique : {e}")
+            try:
+
+                for _, row in edited_df.iterrows():
+
+                    resident_id = row["id"]
+
+                    updates = {}
+
+                    for month_fr, month_db in month_map.items():
+
+                        if month_fr in edited_df.columns:
+
+                            value = str(row[month_fr]).strip()
+
+                            if value == "PAYE":
+                                updates[month_db] = "PAYE"
+                            else:
+                                updates[month_db] = "NON_PAYE"
+
+                    if updates:
+
+                        supabase.table("residents") \
+                            .update(updates) \
+                            .eq("id", resident_id) \
+                            .execute()
+
+                st.success("✅ Modifications enregistrées avec succès")
+                st.rerun()
+
+            except Exception as e:
+                st.error(f"Erreur : {e}") 
+هاكا مزيان
 
     # --- الجزء الخاص بالساكن ---
     else:
