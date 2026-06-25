@@ -170,13 +170,13 @@ def load_expenses():
             return df_exp
 
         return pd.DataFrame(columns=[
-            "DATE",
-            "ANNEE",
-            "MOIS",
-            "MODE DE PAIEMENT",
-            "CATEGORIE",
-            "DESIGNATION",
-            "DEPENSE"
+            "date",
+            "annee",
+            "mois",
+            "mode_de_paiment",
+            "categorie",
+            "designation",
+            "depense"
         ])
 
     except Exception as e:
