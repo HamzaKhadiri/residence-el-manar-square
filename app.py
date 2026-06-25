@@ -298,17 +298,19 @@ if st.session_state.current_page == "Tableau de bord":
 elif st.session_state.current_page == "Cotisations":
     st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")        
     
-    # تنظيف البيانات
-# تنظيف البيانات
+    # --- دالة تحويل القيم للعرض فقط ---
+    def format_payment(val):
+        val_str = str(val).strip().upper()
+        if val_str in ['PAYE', 'PAYÉ']: return '✅'
+        if val_str == 'NON_PAYE': return '❌'
+        return val
+
+    # --- تنظيف البيانات ---
     df_clean = df.copy()
-    # تأكدي أن الأسماء هنا تطابق تماماً ما سيظهر لك في التطبيق
-    if 'annee' in df_clean.columns:
-        df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
-    
-    if 'immeuble' in df_clean.columns:
-        df_clean["immeuble"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
-    
-    # ... وباقي الأعمدة
+    # التحقق من وجود الأعمدة قبل المعالجة
+    if 'annee' in df_clean.columns: df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
+    if 'immeuble' in df_clean.columns: df_clean["immeuble"] = df_clean["immeuble"].astype(str).str.upper().str.strip()
+    if 'nom_complet' in df_clean.columns: df_clean["nom_complet"] = df_clean["nom_complet"].astype(str).str.strip()
 
     if is_admin:
         # --- الفلاتر ---
@@ -341,6 +343,11 @@ elif st.session_state.current_page == "Cotisations":
             cols_to_display = ["immeuble", "appartement", "nom_complet", "telephone", "annee"] + (months_cols if selected_month == "الكل" else [selected_month])
             df_display = df_filtered[cols_to_display].copy()
             
+            # تطبيق التحويل على الجدول قبل العرض
+            for month in months_cols:
+                if month in df_display.columns:
+                    df_display[month] = df_display[month].apply(format_payment)
+            
             # عرض البيانات
             edited_display_df = st.data_editor(df_display, use_container_width=True, hide_index=True)
             
@@ -349,16 +356,19 @@ elif st.session_state.current_page == "Cotisations":
                 st.rerun()
 
     else:
-        # --- كود الساكن (User) - أصبح الآن خارج if is_admin ---
+        # --- كود الساكن (User) ---
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-        
-        # التأكد من الاسم
         user_name = st.session_state.get("user_name", "")
-        df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
+        df_user_cotis = df_clean[df_clean["nom_complet"].str.contains(user_name, case=False, na=False)].copy()
         
         if df_user_cotis.empty:
             st.info("لم يتم العثور على بيانات خاصة بك.")
         else:
+            # تطبيق التحويل للأشهر
+            for month in months_cols:
+                if month in df_user_cotis.columns:
+                    df_user_cotis[month] = df_user_cotis[month].apply(format_payment)
+            
             st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
 
 # 🏦 TRÉSORERIE PAGE
