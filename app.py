@@ -392,9 +392,8 @@ if is_admin:
         st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
 
 # 🏦 TRÉSORERIE PAGE
-if st.session_state.current_page == "Trésorerie":
 elif st.session_state.current_page == "Trésorerie":
-        st.subheader("🏦 Trésorerie - الوضعية المالية")
+    st.subheader("🏦 Trésorerie - الوضعية المالية")
 
     if is_admin:
         # =========================
@@ -402,9 +401,13 @@ elif st.session_state.current_page == "Trésorerie":
         # =========================
         c1, c2 = st.columns(2)
         with c1:
-            tres_year = st.selectbox("Année", years_list, index=years_list.index("2026") if "2026" in years_list else 0, key="tres_year")
+            tres_year = st.selectbox("Année", years_list, 
+                                    index=years_list.index("2026") if "2026" in years_list else 0, 
+                                    key="tres_year")
         with c2:
-            tres_month_num = st.selectbox("Mois", [str(i) for i in range(1, 13)], index=0, key="tres_month")
+            tres_month_num = st.selectbox("Mois", [str(i) for i in range(1, 13)], 
+                                         index=datetime.now().month - 1, 
+                                         key="tres_month")
         
         st.caption(f"📅 Période: {tres_month_num}/{tres_year}")
 
