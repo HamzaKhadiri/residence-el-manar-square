@@ -386,7 +386,7 @@ elif st.session_state.current_page == "Trésorerie":
         total_recette_month = (df_year[month_name].astype(str).str.strip().str.lower().eq("paye").sum() * PRIX_PAR_PAYE)
         
         df_exp_month = df_expenses[(df_expenses["annee"].astype(str) == str(tres_year)) & (df_expenses["mois"].astype(str) == str(tres_month_num))]
-        total_depense_month = df_exp_month["DEPENSE"].sum()
+        total_depense_month = df_exp_month["depense"].sum()
         solde_month = total_recette_month - total_depense_month
 
         # 🔔 ALERTS
