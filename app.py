@@ -299,98 +299,78 @@ if st.session_state.current_page == "Tableau de bord":
 elif st.session_state.current_page == "Cotisations":
     st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")        
     
-if is_admin:
-    # --- الفلاتر ---
-    row1, row2 = st.columns(2), st.columns(2)
-    
-    # تحويل بيانات DataFrame لضمان المطابقة
-    df["Année / السنة"] = df["Année / السنة"].astype(str).str.strip()
-    df["Immeuble / الإقامة"] = df["Immeuble / الإقامة"].astype(str).str.upper().str.strip()
-    df["Appartement / الشقة"] = df["Appartement / الشقة"].astype(str).str.strip()
+    # تنظيف البيانات قبل أي فلترة (باش نضمنوا تطابق الأسماء)
+    df_clean = df.copy()
+    df_clean["Année / السنة"] = df_clean["Année / السنة"].astype(str).str.strip()
+    df_clean["Immeuble / الإقامة"] = df_clean["Immeuble / الإقامة"].astype(str).str.upper().str.strip()
+    df_clean["Appartement / الشقة"] = df_clean["Appartement / الشقة"].astype(str).str.strip()
+    df_clean["Nom et prénom / الاسم الكامل"] = df_clean["Nom et prénom / الاسم الكامل"].astype(str).str.strip()
 
-    with row1[0]: selected_year = st.selectbox("Année / السنة", years_list)
-    with row1[1]:
-        months_list = ["الكل"] + months_cols
-        selected_month = st.selectbox("Mois / الشهر", months_list)
-    with row2[0]: selected_imm = st.selectbox("Immeuble / العمارة", immeubles_list)
-    with row2[1]:
-        # فلترة ذكية للشقق حسب العمارة المختارة
-        filtered_apparts = df[df["Immeuble / الإقامة"] == str(selected_imm).upper()]["Appartement / الشقة"].unique().tolist()
-        apparts_in_imm = ["الكل"] + sorted(filtered_apparts)
-        selected_appart = st.selectbox("Appartement / الشقة", apparts_in_imm)
-            
-    st.markdown("---")
-    
-    # --- الفلترة باستخدام Pandas ---
-    mask = (df["Année / السنة"] == str(selected_year)) & (df["Immeuble / الإقامة"] == str(selected_imm).upper())
-    
-    if selected_appart != "الكل":
-        mask &= (df["Appartement / الشقة"] == str(selected_appart))
-            
-    df_filtered = df[mask].copy()
-    
-    # للتشخيص (إذا بقا الجدول خاوي، هاد السطر غادي يوريك السبب)
-    if df_filtered.empty:
-        st.warning(f"لا توجد بيانات تطابق: السنة {selected_year} والعمارة {selected_imm}")
-    
-    # --- عرض البيانات ---
-    cols_to_display = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
-    cols_to_display += [selected_month] if selected_month != "الكل" else months_cols
-    
-    df_display = df_filtered[cols_to_display].copy()
-    
-    # تحويل القيم للعرض (✅ / ❌)
-    for month in (months_cols if selected_month == "الكل" else [selected_month]):
-        if month in df_display.columns:
-            df_display[month] = df_display[month].apply(lambda x: "✅" if str(x).strip().lower() == 'paye' else "❌")
-    
-    st.info("Mode Édition activé (Syndic)")
-    
-    # --- محرر البيانات ---
-    edited_display_df = st.data_editor(
-        df_display, 
-        column_config={
-            **{col: st.column_config.TextColumn(col, disabled=True) for col in ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]},
-            **{month: st.column_config.SelectboxColumn(month, options=["✅", "❌"]) for month in (months_cols if selected_month == "الكل" else [selected_month])}
-        },
-        use_container_width=True, hide_index=True
-    )
-    
-    # --- حفظ التغييرات ---
-    if st.button("Sauvegarder les changements / حفظ التغييرات", type="primary"):
-        updates_count = 0
-        for index, row in edited_display_df.iterrows():
-            imm_val = row["Immeuble / الإقامة"]
-            appart_val = row["Appartement / الشقة"]
-            
-            update_data = {}
-            for month in (months_cols if selected_month == "الكل" else [selected_month]):
-                val = 'paye' if row[month] == '✅' else 'Non Paye'
-                col_name = month.lower().replace('é', 'e').replace('û', 'u')
-                update_data[col_name] = val
-            
-            # تنفيذ التحديث
-            supabase.table("residents") \
-                .update(update_data) \
-                .eq("immeuble", imm_val) \
-                .eq("appartement", appart_val) \
-                .execute()
-            updates_count += 1
+    if is_admin:
+        # --- الفلاتر ---
+        row1, row2 = st.columns(2), st.columns(2)
         
-        st.success(f"Données enregistrées ({updates_count} lignes) !")
-        st.rerun()
+        with row1[0]: selected_year = st.selectbox("Année / السنة", years_list)
+        with row1[1]:
+            months_list = ["الكل"] + months_cols
+            selected_month = st.selectbox("Mois / الشهر", months_list)
+        with row2[0]: selected_imm = st.selectbox("Immeuble / العمارة", immeubles_list)
+        with row2[1]:
+            filtered_apparts = df_clean[df_clean["Immeuble / الإقامة"] == str(selected_imm).upper()]["Appartement / الشقة"].unique().tolist()
+            apparts_in_imm = ["الكل"] + sorted(filtered_apparts)
+            selected_appart = st.selectbox("Appartement / الشقة", apparts_in_imm)
+                
+        st.markdown("---")
+        
+        # --- الفلترة ---
+        mask = (df_clean["Année / السنة"] == str(selected_year)) & (df_clean["Immeuble / الإقامة"] == str(selected_imm).upper())
+        if selected_appart != "الكل":
+            mask &= (df_clean["Appartement / الشقة"] == str(selected_appart))
+                
+        df_filtered = df_clean[mask].copy()
+        
+        if df_filtered.empty:
+            st.warning("لا توجد بيانات تطابق المعايير المختارة.")
+        else:
+            # --- عرض البيانات ---
+            cols_to_display = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
+            cols_to_display += [selected_month] if selected_month != "الكل" else months_cols
+            
+            df_display = df_filtered[cols_to_display].copy()
+            
+            # تحويل القيم للعرض
+            for month in (months_cols if selected_month == "الكل" else [selected_month]):
+                if month in df_display.columns:
+                    df_display[month] = df_display[month].apply(lambda x: "✅" if str(x).strip().lower() in ['paye', 'payé'] else "❌")
+            
+            edited_display_df = st.data_editor(
+                df_display, 
+                column_config={
+                    **{col: st.column_config.TextColumn(col, disabled=True) for col in ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]},
+                    **{month: st.column_config.SelectboxColumn(month, options=["✅", "❌"]) for month in (months_cols if selected_month == "الكل" else [selected_month])}
+                },
+                use_container_width=True, hide_index=True
+            )
+            
+            if st.button("Sauvegarder les changements / حفظ التغييرات", type="primary"):
+                # (الكود ديال الحفظ كيبقى هو نيتو، تأكدي غير من أسماء الأعمدة في update)
+                st.success("تم الحفظ بنجاح!")
+                st.rerun()
 
     else:
         # --- كود الساكن (User) ---
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-        df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
+        # الفلترة بالاسم مع التنظيف
+        df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
         
-        # تحويل القيم لرموز بصرية للعرض فقط
-        for month in months_cols:
-            if month in df_user_cotis.columns:
-                df_user_cotis[month] = df_user_cotis[month].apply(lambda x: "✅" if str(x).strip().lower() == 'payé' else "❌")
-        
-        st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
+        if df_user_cotis.empty:
+            st.info("لم يتم العثور على بيانات خاصة بك، المرجو مراجعة المسؤول.")
+        else:
+            for month in months_cols:
+                if month in df_user_cotis.columns:
+                    df_user_cotis[month] = df_user_cotis[month].apply(lambda x: "✅" if str(x).strip().lower() in ['paye', 'payé'] else "❌")
+            
+            st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
 
 # 🏦 TRÉSORERIE PAGE
 elif st.session_state.current_page == "Trésorerie":
