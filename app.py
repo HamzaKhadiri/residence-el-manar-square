@@ -396,7 +396,7 @@ else:
 
 
 # 🏦 TRÉSORERIE PAGE
-elif st.session_state.current_page == "Trésorerie":
+  elif st.session_state.current_page == "Trésorerie":
     import pandas as pd
     import streamlit as st
     import plotly.graph_objects as go
