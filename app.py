@@ -372,13 +372,28 @@ if is_admin:
         st.rerun()
 
 else:
-    # كود الساكن
-    st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-    df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
-    for month in months_cols:
-        if month in df_user_cotis.columns:
-            df_user_cotis[month] = df_user_cotis[month].apply(lambda x: "✅" if str(x).strip().lower() == 'paye' else "❌")
-    st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
+
+        # --- كود الساكن (User) ---
+
+        st.write("### 📋 وضعية اشتراكاتك الخاصة:")
+
+        df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
+
+        
+
+        # تحويل القيم لرموز بصرية للعرض فقط
+
+        for month in months_cols:
+
+            if month in df_user_cotis.columns:
+
+                df_user_cotis[month] = df_user_cotis[month].apply(lambda x: "✅" if str(x).strip().lower() == 'paye' else "❌")
+
+        
+
+        st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
+
+
 
 # 🏦 TRÉSORERIE PAGE
 elif st.session_state.current_page == "Trésorerie":
