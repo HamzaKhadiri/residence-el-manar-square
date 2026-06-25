@@ -378,7 +378,7 @@ elif st.session_state.current_page == "Trésorerie":
 
         all_paid = (df[months_cols].astype(str).apply(lambda col: col.str.strip().str.lower() == "paye").sum().sum())
         total_recette_all = all_paid * PRIX_PAR_PAYE
-        total_depense_all = df_expenses["DEPENSE"].sum()
+        total_depense_all = df_expenses["depense"].sum()
         solde_global = solde_initial + total_recette_all - total_depense_all
 
         month_name = months_cols[int(tres_month_num) - 1]
