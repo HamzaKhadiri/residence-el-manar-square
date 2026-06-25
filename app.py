@@ -359,7 +359,7 @@ elif st.session_state.current_page == "Cotisations":
         # --- كود الساكن (User) ---
         st.write("### 📋 وضعية اشتراكاتك الخاصة:")
         user_name = st.session_state.get("user_name", "")
-        df_user_cotis = df_clean[df_clean["nom_complet"].str.contains(user_name, case=False, na=False)].copy()
+        df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
         
         if df_user_cotis.empty:
             st.info("لم يتم العثور على بيانات خاصة بك.")
