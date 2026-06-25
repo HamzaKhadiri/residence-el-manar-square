@@ -450,7 +450,7 @@ if is_admin:
     # --- الجزء الخاص بالساكن ---
         else:
           st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-           user_name = st.session_state.get("user_name", "")
+        user_name = st.session_state.get("user_name", "")
         # استخدام الاسم الصحيح للعمود "Nom et prénom / الاسم الكامل"
            df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
         
