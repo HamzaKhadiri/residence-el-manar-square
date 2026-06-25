@@ -447,7 +447,7 @@ elif st.session_state.current_page == "Trésorerie":
         if not df_display.empty:
             df_display["depense"] = pd.to_numeric(df_display["depense"], errors="coerce").fillna(0)
             df_display["recette"] = 0.0
-            df_display["date"] = pd.to_datetime(df_display["date"], errors="coerce", dayfirst=True)
+            df_display["date"] = pd.to_datetime(df_display["date"], errors="coerce")
             df_display = df_display.sort_values("date", ascending=False)
             df_display["date"] = df_display["date"].dt.strftime("%Y-%m-%d")
             resume = pd.DataFrame([{"date": "", "mode_de_paiement": "", "categorie": "RÉSUMÉ", "designation": "🟢 TOTAL recetteS", "depense": 0, "recette": total_recette_month}])
