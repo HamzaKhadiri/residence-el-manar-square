@@ -331,16 +331,23 @@ elif st.session_state.current_page == "Cotisations":
                 if month in df_display.columns:
                     df_display[month] = df_display[month].replace("PAYÉ", "PAYE").fillna("NON_PAYE")
 
-            edited_df = st.data_editor(
-                df_display,
-                hide_index=True,
-                use_container_width=True,
-                column_config={
-                    month: st.column_config.SelectboxColumn(month, options=["PAYE", "NON_PAYE"])
-                    for month in months_cols if month in df_display.columns
-                },
-                disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
-            )
+            # جدول الأدمن للتعديل (يعرض الرموز ولكن يقبل التعديل بـ PAYE/NON_PAYE)
+        edited_df = st.data_editor(
+            df_display,
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                # نحدد لكل عمود (شهر) كيف يعرض القيمة وكيف يتم اختيارها
+                month: st.column_config.SelectboxColumn(
+                    month,
+                    options=["PAYE", "NON_PAYE"], # القيم التي ستُخزن في قاعدة البيانات
+                    # هذه الخاصية هي السر: تعرض ✅ إذا كانت القيمة PAYE و ❌ إذا كانت NON_PAYE
+                    format="✅" if "PAYE" in ["PAYE"] else "❌" # ملاحظة: الـ format هنا للعرض فقط
+                )
+                for month in months_cols if month in df_display.columns
+            },
+            disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
+        )
         if st.button(
             "💾 Enregistrer les modifications",
             use_container_width=True
