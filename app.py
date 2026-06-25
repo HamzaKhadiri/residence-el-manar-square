@@ -392,6 +392,7 @@ if is_admin:
         st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
 
 # 🏦 TRÉSORERIE PAGE
+if st.session_state.current_page == "Trésorerie":
     elif st.session_state.current_page == "Trésorerie":
         st.subheader("🏦 Trésorerie - الوضعية المالية")
 
