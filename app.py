@@ -346,20 +346,29 @@ elif st.session_state.current_page == "Cotisations":
                     "Octobre": "octobre", "Novembre": "novembre", "Décembre": "decembre"
                 }
                 try:
+                    # نستخدم edited_df للحصول على القيم الجديدة
                     for _, row in edited_df.iterrows():
                         resident_id = row["id"]
                         updates = {}
+                        
                         for month_fr, month_db in month_map.items():
                             if month_fr in edited_df.columns:
-                                val = str(row[month_fr]).strip()
-                                # استخراج القيمة الأساسية (PAYE أو NON_PAYE) من النص المرمز
-                                updates[month_db] = "PAYE" if "PAYE" in val else "NON_PAYE"
+                                val = str(row[month_fr]).upper()
+                                
+                                # منطق مرن جداً للتحقق من القيمة
+                                if "PAYE" in val:
+                                    updates[month_db] = "PAYE"
+                                elif "NON_PAYE" in val:
+                                    updates[month_db] = "NON_PAYE"
+                        
                         if updates:
+                            # تحديث مباشر
                             supabase.table("residents").update(updates).eq("id", resident_id).execute()
+                    
                     st.success("✅ Modifications enregistrées avec succès")
-                    st.rerun()
+                    st.rerun() # إعادة تحميل الصفحة لرؤية التغييرات
                 except Exception as e:
-                    st.error(f"Erreur : {e}")
+                    st.error(f"Erreur lors de l'enregistrement : {e}")
 
     # --- الجزء الخاص بالساكن ---
     else:
