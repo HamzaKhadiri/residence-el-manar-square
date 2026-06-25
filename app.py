@@ -366,10 +366,10 @@ if is_admin:
                 st.rerun()
 
             else:
-        # --- كود الساكن (User) ---
-        st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-        # الفلترة بالاسم مع التنظيف
-        df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
+               # --- كود الساكن (User) ---
+               st.write("### 📋 وضعية اشتراكاتك الخاصة:")
+               # الفلترة بالاسم مع التنظيف
+               df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
         
          if df_user_cotis.empty:
             st.info("لم يتم العثور على بيانات خاصة بك، المرجو مراجعة المسؤول.")
