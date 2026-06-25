@@ -423,7 +423,7 @@ elif st.session_state.current_page == "Trésorerie":
             if st.button("✔️ Ajouter", use_container_width=True):
                 if libelle and montant > 0:
                     new_exp = {
-                        "date": date.strftime("%Y-%m-%d"),
+                        "date": date.strftime("%d-%m-%Y"),
                         "annee": str(tres_year),
                         "mois": str(tres_month_num),
                         "mode_de_paiement": mode,
