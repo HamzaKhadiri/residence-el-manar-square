@@ -371,11 +371,11 @@ if is_admin:
                # الفلترة بالاسم مع التنظيف
                df_user_cotis = df_clean[df_clean["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)].copy()
         
-         if df_user_cotis.empty:
+            if df_user_cotis.empty:
             st.info("لم يتم العثور على بيانات خاصة بك، المرجو مراجعة المسؤول.")
-        else:
-            for month in months_cols:
-                if month in df_user_cotis.columns:
+            else:
+               for month in months_cols:
+                 if month in df_user_cotis.columns:
                     df_user_cotis[month] = df_user_cotis[month].apply(lambda x: "✅" if str(x).strip().lower() in ['paye', 'payé'] else "❌")
             
             st.dataframe(df_user_cotis, use_container_width=True, hide_index=True) 
