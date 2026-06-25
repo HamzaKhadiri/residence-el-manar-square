@@ -384,7 +384,8 @@ elif st.session_state.current_page == "Cotisations":
 elif st.session_state.current_page == "Trésorerie":
     st.subheader("🏦 Trésorerie / الخزينة")
     st.subheader("🏦 Trésorerie / الخزينة")
-    # ضعي كود صفحة الخزينة هنا    if is_admin:
+    # ضعي كود صفحة الخزينة هنا    
+    if is_admin:
         # =========================
         # 📅 FILTERS
         # =========================
