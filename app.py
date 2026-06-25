@@ -448,7 +448,7 @@ if is_admin:
                 st.error(f"Erreur : {e}")
 
     # --- الجزء الخاص بالساكن ---
-        else:
+    else:
 
            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
         user_name = st.session_state.get("user_name", "")
@@ -460,7 +460,6 @@ if is_admin:
 
     if df_user_cotis.empty:
         st.info("لم يتم العثور على بيانات خاصة بك.")
-
     else:
 
         cols_user = [
