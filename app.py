@@ -338,12 +338,10 @@ elif st.session_state.current_page == "Cotisations":
             use_container_width=True,
             column_config={
                 # نحدد لكل عمود (شهر) كيف يعرض القيمة وكيف يتم اختيارها
-                month: st.column_config.SelectboxColumn(
-                    month,
-                    options=["PAYE", "NON_PAYE"], # القيم التي ستُخزن في قاعدة البيانات
-                    # هذه الخاصية هي السر: تعرض ✅ إذا كانت القيمة PAYE و ❌ إذا كانت NON_PAYE
-                    format="✅" if "PAYE" in ["PAYE"] else "❌" # ملاحظة: الـ format هنا للعرض فقط
-                )
+               month: st.column_config.SelectboxColumn(
+                   month,
+                   options=["PAYE", "NON_PAYE"]
+               )
                 for month in months_cols if month in df_display.columns
             },
             disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
