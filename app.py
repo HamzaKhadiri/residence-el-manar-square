@@ -301,11 +301,6 @@ elif st.session_state.current_page == "Cotisations":
     # تنظيف البيانات
 # تنظيف البيانات
     df_clean = df.copy()
-    
-    # --- إضافة سطر للتصحيح (Debug) ---
-    st.write("أسماء الأعمدة المتاحة هي:", df_clean.columns.tolist())
-    # --------------------------------
-    
     # تأكدي أن الأسماء هنا تطابق تماماً ما سيظهر لك في التطبيق
     if 'annee' in df_clean.columns:
         df_clean["annee"] = df_clean["annee"].astype(str).str.strip()
