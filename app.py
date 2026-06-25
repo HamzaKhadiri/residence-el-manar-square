@@ -285,203 +285,103 @@ if st.session_state.current_page == "Tableau de bord":
         else:
             st.warning("لا توجد بيانات مسجلة باسمك لهذه السنة.")
 elif st.session_state.current_page == "Cotisations":
-    st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")        
-    
-    # دالة تحويل القيم (✅ و ❌) للعرض فقط
-    def format_payment(val):
-        val_str = str(val).strip().upper()
-        if val_str in ['PAYE', 'PAYÉ']: return '✅'
-        if val_str == 'NON_PAYE': return '❌'
-        return val
+# --- القسم الخاص بالاشتراكات (الذي نعدل عليه) ---
+st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")
 
-    # --- الجزء الخاص بالأدمن ---
+def format_payment(val):
+    val_str = str(val).strip().upper()
+    if val_str in ['PAYE', 'PAYÉ']: return '✅'
+    if val_str == 'NON_PAYE': return '❌'
+    return val
+
+# --- الجزء الخاص بالأدمن ---
 if is_admin:
     row1, row2 = st.columns(2), st.columns(2)
-    with row1[0]:
-        selected_year = st.selectbox(
-            "Année / السنة",
-            sorted(df["Année / السنة"].unique())
-        )
 
+    with row1[0]:
+        selected_year = st.selectbox("Année / السنة", sorted(df["Année / السنة"].unique()))
     with row1[1]:
         months_list = ["الكل"] + months_cols
-        selected_month = st.selectbox(
-            "Mois / الشهر",
-            months_list
-        )
+        selected_month = st.selectbox("Mois / الشهر", months_list)
 
     with row2[0]:
-        selected_imm = st.selectbox(
-            "Immeuble / الإقامة",
-            sorted(df["Immeuble / الإقامة"].unique())
-        )
-
+        selected_imm = st.selectbox("Immeuble / الإقامة", sorted(df["Immeuble / الإقامة"].unique()))
     with row2[1]:
-        filtered_apparts = df[
-            df["Immeuble / الإقامة"] == selected_imm
-        ]["Appartement / الشقة"].unique().tolist()
-
+        filtered_apparts = df[df["Immeuble / الإقامة"] == selected_imm]["Appartement / الشقة"].unique().tolist()
         apparts_in_imm = ["الكل"] + sorted(filtered_apparts)
-
-        selected_appart = st.selectbox(
-            "Appartement / الشقة",
-            apparts_in_imm
-        )
+        selected_appart = st.selectbox("Appartement / الشقة", apparts_in_imm)
 
     st.markdown("---")
 
-    mask = (
-        (df["Année / السنة"].astype(str) == str(selected_year))
-        &
-        (df["Immeuble / الإقامة"] == selected_imm)
-    )
-
+    mask = (df["Année / السنة"].astype(str) == str(selected_year)) & (df["Immeuble / الإقامة"] == selected_imm)
     if selected_appart != "الكل":
-        mask &= (
-            df["Appartement / الشقة"] == selected_appart
-        )
+        mask &= (df["Appartement / الشقة"] == selected_appart)
 
     df_filtered = df[mask].copy()
 
     if df_filtered.empty:
         st.warning("لا توجد بيانات تطابق الاختيارات.")
-
     else:
-
-        cols_to_display = [
-            "id",
-            "Immeuble / الإقامة",
-            "Appartement / الشقة",
-            "Nom et prénom / الاسم الكامل",
-            "Téléphone / الهاتف",
-            "Année / السنة"
-        ] + (
-            months_cols
-            if selected_month == "الكل"
-            else [selected_month]
-        )
-
+        cols_to_display = ["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"] + (months_cols if selected_month == "الكل" else [selected_month])
         df_display = df_filtered[cols_to_display].copy()
 
         for month in months_cols:
             if month in df_display.columns:
-                df_display[month] = (
-                    df_display[month]
-                    .replace("PAYÉ", "PAYE")
-                    .fillna("NON_PAYE")
-                )
+                df_display[month] = df_display[month].replace("PAYÉ", "PAYE").fillna("NON_PAYE")
 
         edited_df = st.data_editor(
             df_display,
             hide_index=True,
             use_container_width=True,
             column_config={
-                month: st.column_config.SelectboxColumn(
-                    month,
-                    options=["PAYE", "NON_PAYE"]
-                )
-                for month in months_cols
-                if month in df_display.columns
+                month: st.column_config.SelectboxColumn(month, options=["PAYE", "NON_PAYE"])
+                for month in months_cols if month in df_display.columns
             },
-            disabled=[
-                "id",
-                "Immeuble / الإقامة",
-                "Appartement / الشقة",
-                "Nom et prénom / الاسم الكامل",
-                "Téléphone / الهاتف",
-                "Année / السنة"
-            ]
+            disabled=["id", "Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف", "Année / السنة"]
         )
 
-        if st.button(
-            "💾 Enregistrer les modifications",
-            use_container_width=True
-        ):
-
+        if st.button("💾 Enregistrer les modifications", use_container_width=True):
             month_map = {
-                "Janvier": "janvier",
-                "Février": "fevrier",
-                "Mars": "mars",
-                "Avril": "avril",
-                "Mai": "mai",
-                "Juin": "juin",
-                "Juillet": "juillet",
-                "Août": "aout",
-                "Septembre": "septembre",
-                "Octobre": "octobre",
-                "Novembre": "novembre",
-                "Décembre": "decembre"
+                "Janvier / يناير": "janvier", "Février / فبراير": "fevrier", "Mars / مارس": "mars",
+                "Avril / أبريل": "avril", "Mai / مايو": "mai", "Juin / يونيو": "juin",
+                "Juillet / يوليو": "juillet", "Août / أغسطس": "aout", "Septembre / سبتمبر": "septembre",
+                "Octobre / أكتوبر": "octobre", "Novembre / نوفمبر": "novembre", "Décembre / ديسمبر": "decembre"
             }
-
             try:
-
                 for _, row in edited_df.iterrows():
-
                     resident_id = row["id"]
-
                     updates = {}
-
                     for month_fr, month_db in month_map.items():
-
                         if month_fr in edited_df.columns:
-
                             value = str(row[month_fr]).strip()
-
-                            if value == "PAYE":
-                                updates[month_db] = "PAYE"
-                            else:
-                                updates[month_db] = "NON_PAYE"
-
+                            updates[month_db] = "PAYE" if value == "PAYE" else "NON_PAYE"
                     if updates:
-
-                        supabase.table("residents") \
-                            .update(updates) \
-                            .eq("id", resident_id) \
-                            .execute()
-
+                        supabase.table("residents").update(updates).eq("id", resident_id).execute()
                 st.success("✅ Modifications enregistrées avec succès")
                 st.rerun()
-
             except Exception as e:
                 st.error(f"Erreur : {e}")
 
-    # --- الجزء الخاص بالساكن ---
+# --- الجزء الخاص بالساكن ---
 else:
+    st.write("### 📋 وضعية اشتراكاتك الخاصة:")
+    user_name = st.session_state.get("user_name", "")
+    df_user_cotis = df[df["Nom et prénom / الاسم الكامل"].str.contains(user_name, case=False, na=False)].copy()
 
-            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
-            user_name = st.session_state.get("user_name", "")
-            df_user_cotis = df[
-        df["Nom et prénom / الاسم الكامل"]
-        .str.contains(user_name, case=False, na=False)
-    ].copy()
-
-if df_user_cotis.empty:
+    if df_user_cotis.empty:
         st.info("لم يتم العثور على بيانات خاصة بك.")
-else:
-
-        cols_user = [
-            "Immeuble / الإقامة",
-            "Appartement / الشقة",
-            "Nom et prénom / الاسم الكامل",
-            "Année / السنة"
-        ] + months_cols
-
+    else:
+        cols_user = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Année / السنة"] + months_cols
         df_user_cotis = df_user_cotis[cols_user]
-
         for month in months_cols:
             if month in df_user_cotis.columns:
                 df_user_cotis[month] = df_user_cotis[month].apply(format_payment)
+        st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
 
-        st.dataframe(
-            df_user_cotis,
-            use_container_width=True,
-            hide_index=True
-        )
 # 🏦 TRÉSORERIE PAGE
 elif st.session_state.current_page == "Trésorerie":
-    st.subheader("🏦 Trésorerie - الوضعية المالية")
-
-    if is_admin:
+    st.subheader("🏦 Trésorerie / الخزينة")
+    # ضعي كود صفحة الخزينة هنا    if is_admin:
         # =========================
         # 📅 FILTERS
         # =========================
