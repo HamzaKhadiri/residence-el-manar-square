@@ -345,20 +345,20 @@ elif st.session_state.current_page == "Cotisations":
     
     # 1. تأكدي أن هذه الأسماء مطابقة 100% لما يظهر في جدولك
     # إذا كان الجدول يظهر "Janvier / يناير"، يجب أن يكون المفتاح هنا كذلك
-    month_map = {
-        "Janvier / يناير": "janvier",
-        "Février / فبراير": "fevrier",
-        "Mars / مارس": "mars",
-        "Avril / أبريل": "avril",
-        "Mai / مايو": "mai",
-        "Juin / يونيو": "juin",
-        "Juillet / يوليو": "juillet",
-        "Août / أغسطس": "aout",
-        "Septembre / سبتمبر": "septembre",
-        "Octobre / أكتوبر": "octobre",
-        "Novembre / نوفمبر": "novembre",
-        "Décembre / ديسمبر": "decembre"
-    }
+            month_map = {
+                "Janvier / يناير": "janvier",
+                "Février / فبراير": "fevrier",
+                "Mars / مارس": "mars",
+                "Avril / أبريل": "avril",
+                "Mai / مايو": "mai",
+                "Juin / يونيو": "juin",
+                "Juillet / يوليو": "juillet",
+                "Août / أغسطس": "aout",
+                "Septembre / سبتمبر": "septembre",
+                "Octobre / أكتوبر": "octobre",
+                "Novembre / نوفمبر": "novembre",
+                "Décembre / ديسمبر": "decembre"
+            }
 
     try:
         for _, row in edited_df.iterrows():
