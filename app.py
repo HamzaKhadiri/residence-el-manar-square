@@ -381,7 +381,7 @@ else:
         st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
 
 # 🏦 TRÉSORERIE PAGE
-elif st.session_state.current_page == "Trésorerie":
+    elif st.session_state.current_page == "Trésorerie":
     st.subheader("🏦 Trésorerie / الخزينة")
     # ضعي كود صفحة الخزينة هنا    if is_admin:
         # =========================
