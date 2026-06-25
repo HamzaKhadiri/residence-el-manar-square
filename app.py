@@ -472,7 +472,8 @@ elif st.session_state.current_page == "Trésorerie":
             m_col = months_cols[m-1]
             recette = (df_year[m_col].astype(str).str.strip().str.lower().eq("paye").sum() * 300)
             recettes_list.append(recette)
-            exp_m = df_expenses[(df_expenses["ANNEE"].astype(str) == str(tres_year)) & (df_expenses["MOIS"].astype(str) == str(m))]
+            # استخدمي الأسماء العربية التي تظهر في أعمدة جدولك
+            exp_m = df_expenses[(df_expenses["Année / السنة"].astype(str) == str(tres_year)) & (df_expenses["Mois / الشهر"].astype(str) == str(m))]
             depenses_list.append(exp_m["DEPENSE"].sum())
 
         fig = go.Figure()
