@@ -393,7 +393,7 @@ if is_admin:
 
 # 🏦 TRÉSORERIE PAGE
 if st.session_state.current_page == "Trésorerie":
-    elif st.session_state.current_page == "Trésorerie":
+elif st.session_state.current_page == "Trésorerie":
         st.subheader("🏦 Trésorerie - الوضعية المالية")
 
     if is_admin:
