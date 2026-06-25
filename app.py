@@ -345,7 +345,6 @@ elif st.session_state.current_page == "Cotisations":
             "💾 Enregistrer les modifications",
             use_container_width=True
         ):
-
             month_map = {
                 "Janvier": "janvier",
                 "Février": "fevrier",
