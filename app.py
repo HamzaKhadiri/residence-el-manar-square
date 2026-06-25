@@ -284,9 +284,11 @@ if st.session_state.current_page == "Tableau de bord":
             st.dataframe(df_user[columns_to_show], use_container_width=True, hide_index=True)
         else:
             st.warning("لا توجد بيانات مسجلة باسمك لهذه السنة.")
-elif st.session_state.current_page == "Cotisations":
+            
+
 # --- القسم الخاص بالاشتراكات (الذي نعدل عليه) ---
-st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")
+elif st.session_state.current_page == "Cotisations":
+  st.subheader("💵 Situation des paiements de l'année" if langue == "Français" else "💵 وضعية الاشتراكات السنوية")
 
 def format_payment(val):
     val_str = str(val).strip().upper()
