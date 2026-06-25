@@ -402,7 +402,7 @@ elif st.session_state.current_page == "Trésorerie":
             <div style="color:#aaa;font-size:14px;">{title}</div>
             <div style="color:{color};font-size:20px;font-weight:bold;">{value:,.2f} MAD</div></div>""", unsafe_allow_html=True)
         
-        with c1: kpi("💰 Recettes mois", total_recette_month, "#2ecc71")
+        with c1: kpi("💰 recettes mois", total_recette_month, "#2ecc71")
         with c2: kpi("💸 Dépenses mois", total_depense_month, "#e74c3c")
         with c3: kpi("📊 Solde mois", solde_month, "#3498db")
         with c4: kpi("🏦 Solde global", solde_global, "#8e44ad")
@@ -416,7 +416,7 @@ elif st.session_state.current_page == "Trésorerie":
             mode = st.selectbox("Mode paiement", ["ESPECE", "VIREMENT", "CHEQUE", "FRAIS BANQUE"])
             cat = st.selectbox("Catégorie", ["Entretien", "Salaire", "Electricité", "PRODUIT", "Autres"])
         with c2: 
-            date = st.date_input("Date")
+            date = st.date_input("date")
             libelle = st.text_input("Libellé")
         with c3: 
             montant = st.number_input("Montant", min_value=0.0, step=50.0)
@@ -445,12 +445,12 @@ elif st.session_state.current_page == "Trésorerie":
         st.markdown("### 📋 Opérations")
         df_display = df_exp_month.copy()
         if not df_display.empty:
-            df_display["DEPENSE"] = pd.to_numeric(df_display["DEPENSE"], errors="coerce").fillna(0)
-            df_display["RECETTE"] = 0.0
-            df_display["DATE"] = pd.to_datetime(df_display["DATE"], errors="coerce", dayfirst=True)
-            df_display = df_display.sort_values("DATE", ascending=False)
-            df_display["DATE"] = df_display["DATE"].dt.strftime("%d/%m/%Y")
-            resume = pd.DataFrame([{"DATE": "", "MODE DE PAIEMENT": "", "CATEGORIE": "RÉSUMÉ", "DESIGNATION": "🟢 TOTAL RECETTES", "DEPENSE": 0, "RECETTE": total_recette_month}])
+            df_display["depense"] = pd.to_numeric(df_display["depense"], errors="coerce").fillna(0)
+            df_display["recette"] = 0.0
+            df_display["date"] = pd.to_datetime(df_display["date"], errors="coerce", dayfirst=True)
+            df_display = df_display.sort_values("date", ascending=False)
+            df_display["date"] = df_display["date"].dt.strftime("%d/%m/%Y")
+            resume = pd.DataFrame([{"date": "", "MODE DE PAIEMENT": "", "CATEGORIE": "RÉSUMÉ", "DESIGNATION": "🟢 TOTAL recetteS", "depense": 0, "recette": total_recette_month}])
             df_final = pd.concat([resume, df_display], ignore_index=True)
             st.dataframe(df_final, use_container_width=True, hide_index=True)
 
@@ -463,10 +463,10 @@ elif st.session_state.current_page == "Trésorerie":
             recettes_list.append(recette)
             # استخدمي الأسماء العربية التي تظهر في أعمدة جدولك
             exp_m = df_expenses[(df_expenses["Année / السنة"].astype(str) == str(tres_year)) & (df_expenses["Mois / الشهر"].astype(str) == str(m))]
-            depenses_list.append(exp_m["DEPENSE"].sum())
+            depenses_list.append(exp_m["depense"].sum())
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=months_cols, y=recettes_list, mode='lines+markers', name='Recettes', line=dict(color='#f39c12', width=5)))
+        fig.add_trace(go.Scatter(x=months_cols, y=recettes_list, mode='lines+markers', name='recettes', line=dict(color='#f39c12', width=5)))
         fig.add_trace(go.Scatter(x=months_cols, y=depenses_list, mode='lines+markers', name='Dépenses', line=dict(color='#e74c3c', width=5)))
         fig.update_layout(xaxis_title="Mois", yaxis_title="Montant (MAD)", plot_bgcolor='rgba(0,0,0,0)', hovermode="x unified", height=400)
         st.plotly_chart(fig, use_container_width=True)
@@ -478,7 +478,7 @@ elif st.session_state.current_page == "Trésorerie":
             doc = SimpleDocTemplate(file_name, pagesize=A4)
             styles = getSampleStyleSheet()
             elements = [Paragraph("<b>Rapport de Trésorerie</b>", styles["Title"]), Spacer(1, 12)]
-            data = [["Désignation", "Montant (MAD)"], ["Total Recettes", f"{total_recette_month:,.2f}"], ["Total Dépenses", f"{total_depense_month:,.2f}"], ["Solde Final", f"{solde_month:,.2f}"]]
+            data = [["Désignation", "Montant (MAD)"], ["Total recettes", f"{total_recette_month:,.2f}"], ["Total Dépenses", f"{total_depense_month:,.2f}"], ["Solde Final", f"{solde_month:,.2f}"]]
             table = Table(data, colWidths=[250, 150])
             table.setStyle(TableStyle([('BACKGROUND', (0, 0), (1, 0), colors.lightgrey), ('GRID', (0, 0), (-1, -1), 1, colors.black), ('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold')]))
             elements.append(table)
