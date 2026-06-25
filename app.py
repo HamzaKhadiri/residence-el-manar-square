@@ -448,7 +448,7 @@ elif st.session_state.current_page == "Cotisations":
                 st.error(f"Erreur : {e}")
 
     # --- الجزء الخاص بالساكن ---
-   else:
+    else:
 
            st.write("### 📋 وضعية اشتراكاتك الخاصة:")
             user_name = st.session_state.get("user_name", "")
