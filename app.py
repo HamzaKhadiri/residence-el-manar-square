@@ -7,6 +7,15 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from supabase import create_client
+import pandas as pd
+    import streamlit as st
+    import plotly.graph_objects as go
+    from datetime import datetime
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet
+    import os
 
 
 # 1. إعدادات الصفحة الأولى
@@ -384,16 +393,6 @@ if is_admin:
 
 # 🏦 TRÉSORERIE PAGE
    elif st.session_state.current_page == "Trésorerie":
-    import pandas as pd
-    import streamlit as st
-    import plotly.graph_objects as go
-    from datetime import datetime
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet
-    import os
-
     st.subheader("🏦 Trésorerie - الوضعية المالية")
 
     if is_admin:
