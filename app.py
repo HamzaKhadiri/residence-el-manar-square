@@ -103,7 +103,7 @@ st.markdown("""
 
 # 3. إعدادات الأشهر والعمارات والسنوات
 months_cols = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
-immeubles_list = ["Imm A", "Imm B", "Imm C", "Imm D", "Imm E", "Imm F", "Imm G", "Bureau"]
+immeubles_list = ["Imm_A", "Imm_B", "Imm_C", "Imm_D", "Imm_E", "Imm_F", "Imm_G", "Bureau"]
 years_list = ["2025", "2026", "2027", "2028"]
 
 # دالة جلب بيانات الاشتراكات وتصحيحها أوتوماتيكياً
