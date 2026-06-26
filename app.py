@@ -350,13 +350,10 @@ elif st.session_state.current_page == "Cotisations":
                     for _, row in edited_df.iterrows():
                         resident_id = row["id"]
                         updates = {}
-                        
                         for month_fr, month_db in month_map.items():
                             if month_fr in edited_df.columns:
-                                val = str(row[month_fr]).upper()
-                                
-                                # منطق مرن جداً للتحقق من القيمة
-                                if "PAYE" in val:
+                                val = str(row[month_fr]).strip().upper()
+                                if val.endswith("PAYE") and "NON" not in val:
                                     updates[month_db] = "PAYE"
                                 elif "NON_PAYE" in val:
                                     updates[month_db] = "NON_PAYE"
