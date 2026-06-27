@@ -241,6 +241,28 @@ nav_cols = st.columns(3)
 if nav_cols[0].button("📊 Tableau de bord"): st.session_state.current_page = "Tableau de bord"
 if nav_cols[1].button("💵 Cotisations"): st.session_state.current_page = "Cotisations"
 if nav_cols[2].button("🏦 Trésorerie"): st.session_state.current_page = "Trésorerie"
+    # تقسيم الصفحة إلى Tabs
+tab1, tab2, tab3 = st.tabs(["📊 لوحة التحكم", "🏠 إدارة السكان", "💸 تتبع الاشتراكات"])
+
+with tab1:
+    st.subheader("ملخص عام عن الإقامة")
+    # إضافة Metrics للملخص السريع
+    col1, col2, col3 = st.columns(3)
+    # ملاحظة: يجب أن تحسبي القيم من الـ df أولاً
+    total_paid = df[df["janvier"] == "PAYE"].shape[0] # مثال لجانفي
+    col1.metric("عدد الشقق الخالصة", value=total_paid)
+    col2.metric("الإيرادات المتوقعة", value="XXX DH")
+    col3.metric("المصاريف", value="YYY DH")
+
+with tab2:
+    st.subheader("قائمة السكان")
+    # هنا تضعين الجدول الخاص بالسكان
+    st.dataframe(df, use_container_width=True)
+
+with tab3:
+    st.subheader("متابعة التحصيلات")
+    # هنا تضعين منطق التعديل والأزرار
+    st.info("قومي بتعديل حالات الدفع من هنا")
 
 # --- القائمة الجانبية (لرفع صلاحية الأدمن) ---
 st.sidebar.markdown("### ⚙️ Configuration")
