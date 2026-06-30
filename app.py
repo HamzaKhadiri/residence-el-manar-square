@@ -569,37 +569,41 @@ elif st.session_state.current_page == "Rapports":
             else:
                 st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-     # --- TAB 2: Statistiques (النسخة الأكثر أماناً) ---
+    # --- TAB 2: Statistiques (النسخة النهائية لتفادي الأخطاء) ---
         with tab2:
             st.subheader("📊 Statistiques Globales (Cumulatif)")
-            
-            # 1. تحديد أسماء الأعمدة ديناميكياً (ليتجنب الـ KeyError)
-            # نأخذ الأسماء الحقيقية من جدولك
-            col_year = df.columns[0] # تأكد أن العمود الأول هو السنة
-            col_month = df.columns[1] # تأكد أن العمود الثاني هو الشهر
             
             col1, col2 = st.columns(2)
             with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
             with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
-            # 2. حساب قيمة التاريخ بدون الاعتماد على نصوص الأعمدة
-            def get_date_val(y, m):
-                return int(y) * 12 + months_cols.index(m)
+            # دالة آمنة لتحويل التاريخ
+            def get_safe_date_val(y, m):
+                try:
+                    # تحويل السنة لرقم صحيح
+                    year_int = int(y)
+                    # تنظيف اسم الشهر وإيجاد ترتيبه (استخدام strip() لإزالة أي فراغات)
+                    month_clean = str(m).strip()
+                    month_idx = months_cols.index(month_clean)
+                    return year_int * 12 + month_idx
+                except:
+                    return 0 # في حالة حدوث خطأ نعيد 0 لتجنب الانهيار
 
-            # 3. فلترة البيانات (بدون استخدام apply مع أسماء أعمدة)
+            # 1. إنشاء df_stats وتطبيق الدالة
             df_stats = df.copy()
-            # نستخدم .iloc للوصول للأعمدة برقمها بدل اسمها
-            df_stats["date_val"] = [get_date_val(y, m) for y, m in zip(df_stats.iloc[:, 0], df_stats.iloc[:, 1])]
+            # التأكد من تحويل الأعمدة لنصوص قبل المعالجة
+            df_stats["date_val"] = [get_safe_date_val(y, m) for y, m in zip(df_stats.iloc[:, 0].astype(str), df_stats.iloc[:, 1].astype(str))]
             
-            target_date_val = get_date_val(selected_year_t2, selected_month_t2)
+            # 2. الفلترة
+            target_date_val = get_safe_date_val(selected_year_t2, selected_month_t2)
             df_filtered = df_stats[df_stats["date_val"] <= target_date_val].copy()
 
-            # 4. حساب المتأخرات
+            # 3. حساب المتأخرات (نفس منطقك السابق)
             df_filtered["Nb_Retards"] = df_filtered[months_cols].apply(
                 lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
             )
 
-            # 5. التجميع (Groupby) حسب الاسم والشقة
+            # 4. التجميع
             top_debtors = df_filtered.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards"]].sum().reset_index()
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
