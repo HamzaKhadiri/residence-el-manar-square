@@ -530,22 +530,17 @@ elif st.session_state.current_page == "Rapports":
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
         with tab1:
-    st.subheader("💰 Cotisations en retard")
-    
-    # 1. إعداد الفلاتر (السنة، الإقامة، الشهر)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        selected_year = st.selectbox("السنة / Année", years_list, key="rep_year")
-    with col2:
-        # إضافة خيار "الكل" للإقامة
-        immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
-        selected_imm = st.selectbox("الإقامة / Immeuble", immeubles_options, key="rep_imm")
-    with col3:
-        selected_month = st.selectbox("الشهر / Mois", months_cols, key="rep_month")
-    
-    # تحديد نطاق الأشهر للحساب
-    month_index = months_cols.index(selected_month)
-    months_to_check = months_cols[:month_index + 1]
+            st.subheader("💰 Cotisations en retard")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                selected_year = st.selectbox("السنة / Année", years_list, key="rep_year")    
+            with col2:
+                immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
+                selected_imm = st.selectbox("الإقامة / Immeuble", immeubles_options, key="rep_imm")
+            with col3:
+                selected_month = st.selectbox("الشهر / Mois", months_cols, key="rep_month")
+            month_index = months_cols.index(selected_month)
+            months_to_check = months_cols[:month_index + 1]
 
     MONTANT_COTISATION = 300
     VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
