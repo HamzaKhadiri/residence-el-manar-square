@@ -528,32 +528,9 @@ elif st.session_state.current_page == "Trésorerie":
 elif st.session_state.current_page == "Rapports":
     st.subheader("📈 Rapports")  
     if is_admin:
-        tab1, tab2, tab3 = st.tabs([
-
-"💰 Cotisations en retard",
-
-"📊 Statistiques",
-
-"📄 Exports"
-
-])
-
-
-
-with tab1:
-
-st.info("🚧 En cours de développement")
-
-
-
-with tab2:
-
-st.info("🚧 En cours de développement")
-
-
-
-with tab3:
-
-st.info("🚧 En cours de développement") 
+        tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard","📊 Statistiques","📄 Exports"])
+        with tab1:st.info("🚧 En cours de développement")
+        with tab2:st.info("🚧 En cours de développement")
+        with tab3:st.info("🚧 En cours de développement") 
 
 
