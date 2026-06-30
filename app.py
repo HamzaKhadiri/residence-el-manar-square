@@ -619,7 +619,7 @@ elif st.session_state.current_page == "Rapports":
             lambda x: "🔴 Critique" if x >= 6 else "🟠 Attention"
         )
 
-        st.subheader("⚠️ Résidents ayant 4 mois de retard ou plus")
+        st.subheader("⚠️ Résidents ayant 3 mois de retard ou plus")
 
         # عرض الجدول مع تنسيق الألوان والأعمدة
         st.dataframe(
@@ -644,7 +644,7 @@ elif st.session_state.current_page == "Rapports":
 
         st.markdown("""
         ### 🟢 Légende
-        - 🟠 **Attention** : entre **4 et 5 mois** de retard.
+        - 🟠 **Attention** : entre **3 et 6 mois** de retard.
         - 🔴 **Critique** : **6 mois ou plus** de retard.
         """)
     else:
