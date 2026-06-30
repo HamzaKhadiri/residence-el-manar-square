@@ -529,7 +529,25 @@ elif st.session_state.current_page == "Rapports":
     st.subheader("📈 Rapports")  
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard","📊 Statistiques","📄 Exports"])
-        with tab1:st.info("🚧 En cours de développement")
+        with tab1:st.info
+            St.subheader("💰 Cotisations en retard")
+        MONTANT_COTISATION = 300
+        VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
+        def calculer_retards(row):
+            impayes = [m for m in months_cols if str(row.get(m, "")).upper().strip() in VALEURS_IMPAYE]
+            nb_impayes = len(impayes)
+    
+    if nb_impayes > 0:
+        return pd.Series({
+            "Immeuble": row.get("Immeuble / الإقامة"),
+            "Appartement": row.get("Appartement / الشقة"),
+            "Nom": row.get("Nom et prénom / الاسم الكامل"),
+            "Téléphone": row.get("Téléphone / الهاتف"),
+            "Mois impayés": nb_impayes,
+            "Montant dû": nb_impayes * MONTANT_COTISATION
+        })
+    return None
+df_retards = df.apply(calculer_retards, axis=1).dropna(how='all')
         with tab2:st.info("🚧 En cours de développement")
         with tab3:st.info("🚧 En cours de développement") 
 
