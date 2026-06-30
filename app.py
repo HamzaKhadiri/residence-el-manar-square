@@ -530,27 +530,39 @@ elif st.session_state.current_page == "Rapports":
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
         with tab1:
-            st.subheader("💰 Cotisations en retard")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                selected_year = st.selectbox("السنة / Année", years_list, key="rep_year")    
-            with col2:
-                immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
-                selected_imm = st.selectbox("الإقامة / Immeuble", immeubles_options, key="rep_imm")
-            with col3:
-                selected_month = st.selectbox("الشهر / Mois", months_cols, key="rep_month")
-            month_index = months_cols.index(selected_month)
-            months_to_check = months_cols[:month_index + 1]
+    st.subheader("💰 Cotisations en retard")
+    
+    # 1. الفلاتر
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        selected_year = st.selectbox("Année", years_list, key="rep_year")
+    with col2:
+        immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
+        selected_imm = st.selectbox("Immeuble", immeubles_options, key="rep_imm")
+    with col3:
+        selected_month = st.selectbox("Mois de référence", months_cols, key="rep_month")
+    
+    # تحديد نطاق الأشهر
+    month_index = months_cols.index(selected_month)
+    months_to_check = months_cols[:month_index + 1]
 
     MONTANT_COTISATION = 300
     VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
 
-    def calculer_retards_filtres(row):
+    # 2. الفلترة المسبقة للـ DataFrame
+    df_filtered = df[df["Année / السنة"].astype(str) == str(selected_year)].copy()
+    if selected_imm != "الكل":
+        df_filtered = df_filtered[df_filtered["Immeuble / الإقامة"] == selected_imm]
+
+    # 3. حساب المتأخرات
+    retards = []
+    for _, row in df_filtered.iterrows():
+        # فحص الأشهر في النطاق المحدد فقط
         impayes = [m for m in months_to_check if str(row.get(m, "")).upper().strip() in VALEURS_IMPAYE]
         nb_impayes = len(impayes)
         
         if nb_impayes > 0:
-            return pd.Series({
+            retards.append({
                 "Immeuble": row.get("Immeuble / الإقامة"),
                 "Appartement": row.get("Appartement / الشقة"),
                 "Nom": row.get("Nom et prénom / الاسم الكامل"),
@@ -558,22 +570,19 @@ elif st.session_state.current_page == "Rapports":
                 "Mois impayés": nb_impayes,
                 "Montant dû": nb_impayes * MONTANT_COTISATION
             })
-        return None
 
-    # 2. تطبيق الفلترة على البيانات
-    df_filtered = df[df["Année / السنة"].astype(str) == str(selected_year)].copy()
-    
-    if selected_imm != "الكل":
-        df_filtered = df_filtered[df_filtered["Immeuble / الإقامة"] == selected_imm]
+    df_retards = pd.DataFrame(retards)
 
-    # 3. حساب المتأخرات
-    df_retards = df_filtered.apply(calculer_retards_filtres, axis=1).dropna(how='all')
-
-    # 4. عرض النتائج
+    # 4. العرض (هنا نضمن أن البيانات منظمة)
     if df_retards.empty:
-        st.success(f"✅ لا توجد متأخرات في {selected_imm if selected_imm != 'الكل' else 'جميع الإقامات'} حتى شهر {selected_month}.")
+        st.success("✅ Aucun retard de paiement.")
     else:
-        st.dataframe(df_retards, use_container_width=True, hide_index=True)
+        # عرض البيانات بدون تداخل
+        st.dataframe(
+            df_retards, 
+            use_container_width=True, 
+            hide_index=True
+        )
         
         
 
