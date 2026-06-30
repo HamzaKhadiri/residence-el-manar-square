@@ -569,40 +569,44 @@ elif st.session_state.current_page == "Rapports":
             else:
                 st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-       # --- TAB 2: Statistiques (النسخة التراكمية الصحيحة) ---
+      # --- TAB 2: Statistiques (حساب تراكمي دقيق) ---
         with tab2:
-            st.subheader("📊 Statistiques Globales")
+            st.subheader("📊 Statistiques Globales (Cumulatif)")
             
             # الفلاتر
             col1, col2 = st.columns(2)
-            with col1: selected_year_t2 = st.selectbox("Année", years_list, key="year_t2")
-            with col2: selected_month_t2 = st.selectbox("Mois de référence", months_cols, key="month_t2")
+            with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
+            with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
-            # 1. فلترة البيانات لتشمل السنوات السابقة + السنة المختارة فقط
-            # نحول السنوات لنصوص للمقارنة
-            df_stats = df[df["Année / السنة"].astype(int) <= int(selected_year_t2)].copy()
+            # 1. تحويل التاريخ المختار لرقم (السنة * 12 + شهر)
+            # افترضنا أن الأعمدة هي "Année / السنة" و "Mois / الشهر"
+            def get_date_val(y, m):
+                return int(y) * 12 + months_cols.index(m)
 
-            # 2. تحديد الأشهر التي يجب حسابها (من يناير إلى الشهر المختار)
-            month_idx = months_cols.index(selected_month_t2)
-            months_to_check = months_cols[:month_idx + 1]
+            target_date_val = get_date_val(selected_year_t2, selected_month_t2)
 
-            # 3. حساب المتأخرات:
-            # هنا سنقوم بحساب المتأخرات بناءً على النطاق الزمني الصحيح
-            def calculer_retard_total(row):
-                # إذا كانت السنة أصغر من السنة المختارة، نحسب كل الأشهر فيها (NON_PAYE)
-                # إذا كانت السنة تساوي السنة المختارة، نحسب فقط حتى الشهر المختار
-                if int(row["Année / السنة"]) < int(selected_year_t2):
-                    return row[months_cols].astype(str).str.upper().str.contains("NON_PAYE").sum()
-                else:
-                    return row[months_to_check].astype(str).str.upper().str.contains("NON_PAYE").sum()
+            # 2. فلترة البيانات: نأخذ فقط البيانات التي تاريخها <= التاريخ المختار
+            df_stats = df.copy()
+            df_stats["date_val"] = df_stats.apply(lambda row: get_date_val(row["Année / السنة"], row["Mois / الشهر"]), axis=1)
+            df_filtered = df_stats[df_stats["date_val"] <= target_date_val].copy()
 
-            df_stats["Nb_Retards"] = df_stats.apply(calculer_retard_total, axis=1)
+            # 3. حساب عدد المتأخرات (NON_PAYE) لكل صف
+            df_filtered["Nb_Retards_Row"] = df_filtered[months_cols].apply(
+                lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
+            )
+
+            # 4. التجميع (Groupby): هنا السحر! نجمع كل المتأخرات لكل ساكن
+            # نجمع حسب الاسم والشقة
+            top_debtors = df_filtered.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             
-            # 4. إظهار النتائج (من لديهم 1 شهر فما فوق)
-            top_debtors = df_stats[df_stats["Nb_Retards"] >= 1].sort_values(by="Nb_Retards", ascending=False).copy()
+            # إعادة تسمية العمود
+            top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
+            
+            # فلترة من لديهم تأخير > 0
+            top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
             if not top_debtors.empty:
-                # توزيع الألوان
+                # توزيع الألوان (حسب طلبك)
                 def get_alert_color(n):
                     if n >= 6: return "🔴 Critique (6+ mois)"
                     elif n >= 3: return "🟠 Attention (3-5 mois)"
@@ -610,10 +614,7 @@ elif st.session_state.current_page == "Rapports":
 
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 
-                st.subheader(f"⚠️ وضعية المتأخرات حتى {selected_month_t2} {selected_year_t2}")
-                st.dataframe(
-                    top_debtors[["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Nb_Retards", "Niveau"]], 
-                    use_container_width=True, hide_index=True
-                )
+                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
+                st.dataframe(top_debtors, use_container_width=True, hide_index=True)
             else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
+                st.success("🎉 لا توجد متأخرات في هذه الفترة التراكمية.")
