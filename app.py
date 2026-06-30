@@ -386,8 +386,7 @@ elif st.session_state.current_page == "Cotisations":
 
 # --- صفحة الخزينة ---
 elif st.session_state.current_page == "Trésorerie":
-    st.subheader("🏦 Trésorerie / الخزينة")
-    # ضعي كود صفحة الخزينة هنا    
+    st.subheader("🏦 Trésorerie / الخزينة")  
     if is_admin:
         # =========================
         # 📅 FILTERS
@@ -526,3 +525,6 @@ elif st.session_state.current_page == "Trésorerie":
 
     else:
         st.warning("⚠️ هذه الصفحة مخصصة للمدير فقط.")
+elif st.session_state.current_page == "Rapports":
+    st.subheader("📈 Rapports")  
+    if is_admin:
