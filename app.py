@@ -538,7 +538,7 @@ elif st.session_state.current_page == "Rapports":
             nb_impayes = len(impayes)
     
     if nb_impayes > 0:
-        return pd.Series({
+return pd.Series({
             "Immeuble": row.get("Immeuble / الإقامة"),
             "Appartement": row.get("Appartement / الشقة"),
             "Nom": row.get("Nom et prénom / الاسم الكامل"),
