@@ -530,9 +530,8 @@ elif st.session_state.current_page == "Rapports":
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
         with tab1:
-    st.subheader("💰 Cotisations en retard")
+            st.subheader("💰 Cotisations en retard")
     
-    # 1. الفلاتر
     col1, col2, col3 = st.columns(3)
     with col1:
         selected_year = st.selectbox("Année", years_list, key="rep_year")
