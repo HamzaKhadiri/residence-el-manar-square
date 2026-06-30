@@ -575,55 +575,39 @@ elif st.session_state.current_page == "Rapports":
         with tab2:
             st.subheader("📊 Statistiques Globales")
             
-            # الفلاتر (سنة + شهر + إقامة)
-            col1, col2, col3 = st.columns(3)
-            with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
-            with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
-            with col3: selected_imm_t2 = st.selectbox("Immeuble", immeubles_options, key="imm_t2")
+            # الفلاتر
+            col1, col2 = st.columns(2)
+            with col1: selected_imm_t2 = st.selectbox("Immeuble", immeubles_options, key="imm_t2")
+            with col2: selected_month_t2 = st.selectbox("Mois de référence", months_cols, key="month_t2")
 
-            # 1. تحويل الشهر والسنة إلى تاريخ رقمي للمقارنة
-            def get_date_val(year, month):
-                return int(year) * 12 + months_cols.index(month)
-
-            target_date_val = get_date_val(selected_year_t2, selected_month_t2)
-
-            # 2. فلترة البيانات تراكمياً (كل الأشهر والسنوات <= التاريخ المختار)
+            # الحساب التراكمي:
+            # بما أنك لا تريد فلترة السنة، سنعتمد فقط على الشهر المختار في الـ DataFrame
             df_stats = df.copy()
-            # إضافة عمود للقيمة الرقمية لكل صف في الجدول
-            df_stats["date_val"] = df_stats.apply(lambda row: get_date_val(row["Année / السنة"], row["Mois / الشهر"]), axis=1)
-            
-            # الفلترة: فقط البيانات التي تسبق أو تساوي التاريخ المختار
-            df_stats = df_stats[df_stats["date_val"] <= target_date_val]
             if selected_imm_t2 != "الكل":
                 df_stats = df_stats[df_stats["Immeuble / الإقامة"] == selected_imm_t2]
 
-            # 3. حساب الأشهر المتأخرة (Non Payé) تراكمياً لكل ساكن
-            # هنا نجمع كل الـ Non Payé في الفترة كلها
+            # نحسب عدد الأشهر المتأخرة لكل ساكن (بناءً على قائمة أشهرك الكاملة)
+            # هذه الطريقة لا تحتاج لتغيير أسماء الأعمدة، فهي تعمل على أي أعمدة موجودة أصلاً
             df_stats["Nb_Retards"] = df_stats[months_cols].apply(
                 lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
             )
-
-            # 4. التصفية: إظهار من لديهم شهر واحد فأكثر (حسب طلبك: من 1 شهر إلى 3+ بالألوان)
+            
+            # فلترة من لديهم تأخر (من 1 شهر فما فوق)
             top_debtors = df_stats[df_stats["Nb_Retards"] >= 1].copy()
 
             if not top_debtors.empty:
-                # توزيع الألوان والمستويات
+                # التصنيف اللوني
                 def get_alert_color(n):
                     if n >= 6: return "🔴 Critique (6+ mois)"
-                    elif n >= 3: return "🟠 Attention (3-6 mois)"
+                    elif n >= 3: return "🟠 Attention (3-5 mois)"
                     else: return "🟡 Surveillance (1-2 mois)"
 
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 
-                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
-                
+                st.subheader("⚠️ Résidents ayant des retards")
                 st.dataframe(
                     top_debtors[["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Nb_Retards", "Niveau"]], 
-                    use_container_width=True, 
-                    hide_index=True
+                    use_container_width=True, hide_index=True
                 )
-                
-                # إحصائيات سريعة
-                st.write(f"إجمالي الساكنة المتأخرين في هذه الفترة: **{len(top_debtors)}**")
             else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة التراكمية.")
+                st.success("🎉 Aucun retard trouvé.")
