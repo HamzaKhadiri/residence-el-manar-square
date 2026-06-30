@@ -569,44 +569,41 @@ elif st.session_state.current_page == "Rapports":
             else:
                 st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-      # --- TAB 2: Statistiques (حساب تراكمي دقيق) ---
+     # --- TAB 2: Statistiques (النسخة الأكثر أماناً) ---
         with tab2:
             st.subheader("📊 Statistiques Globales (Cumulatif)")
             
-            # الفلاتر
+            # 1. تحديد أسماء الأعمدة ديناميكياً (ليتجنب الـ KeyError)
+            # نأخذ الأسماء الحقيقية من جدولك
+            col_year = df.columns[0] # تأكد أن العمود الأول هو السنة
+            col_month = df.columns[1] # تأكد أن العمود الثاني هو الشهر
+            
             col1, col2 = st.columns(2)
             with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
             with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
-            # 1. تحويل التاريخ المختار لرقم (السنة * 12 + شهر)
-            # افترضنا أن الأعمدة هي "Année / السنة" و "Mois / الشهر"
+            # 2. حساب قيمة التاريخ بدون الاعتماد على نصوص الأعمدة
             def get_date_val(y, m):
                 return int(y) * 12 + months_cols.index(m)
 
-            target_date_val = get_date_val(selected_year_t2, selected_month_t2)
-
-            # 2. فلترة البيانات: نأخذ فقط البيانات التي تاريخها <= التاريخ المختار
+            # 3. فلترة البيانات (بدون استخدام apply مع أسماء أعمدة)
             df_stats = df.copy()
-            df_stats["date_val"] = df_stats.apply(lambda row: get_date_val(row["Année / السنة"], row["Mois / الشهر"]), axis=1)
+            # نستخدم .iloc للوصول للأعمدة برقمها بدل اسمها
+            df_stats["date_val"] = [get_date_val(y, m) for y, m in zip(df_stats.iloc[:, 0], df_stats.iloc[:, 1])]
+            
+            target_date_val = get_date_val(selected_year_t2, selected_month_t2)
             df_filtered = df_stats[df_stats["date_val"] <= target_date_val].copy()
 
-            # 3. حساب عدد المتأخرات (NON_PAYE) لكل صف
-            df_filtered["Nb_Retards_Row"] = df_filtered[months_cols].apply(
+            # 4. حساب المتأخرات
+            df_filtered["Nb_Retards"] = df_filtered[months_cols].apply(
                 lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
             )
 
-            # 4. التجميع (Groupby): هنا السحر! نجمع كل المتأخرات لكل ساكن
-            # نجمع حسب الاسم والشقة
-            top_debtors = df_filtered.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
-            
-            # إعادة تسمية العمود
-            top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
-            
-            # فلترة من لديهم تأخير > 0
+            # 5. التجميع (Groupby) حسب الاسم والشقة
+            top_debtors = df_filtered.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards"]].sum().reset_index()
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
             if not top_debtors.empty:
-                # توزيع الألوان (حسب طلبك)
                 def get_alert_color(n):
                     if n >= 6: return "🔴 Critique (6+ mois)"
                     elif n >= 3: return "🟠 Attention (3-5 mois)"
@@ -617,4 +614,4 @@ elif st.session_state.current_page == "Rapports":
                 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
                 st.dataframe(top_debtors, use_container_width=True, hide_index=True)
             else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة التراكمية.")
+                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
