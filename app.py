@@ -569,7 +569,7 @@ elif st.session_state.current_page == "Rapports":
             else:
                 st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-    # --- TAB 2: Statistiques (النسخة النهائية لتفادي الأخطاء) ---
+   # --- TAB 2: Statistiques (النسخة الدقيقة) ---
         with tab2:
             st.subheader("📊 Statistiques Globales (Cumulatif)")
             
@@ -577,34 +577,37 @@ elif st.session_state.current_page == "Rapports":
             with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
             with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
-            # دالة آمنة لتحويل التاريخ
-            def get_safe_date_val(y, m):
-                try:
-                    # تحويل السنة لرقم صحيح
-                    year_int = int(y)
-                    # تنظيف اسم الشهر وإيجاد ترتيبه (استخدام strip() لإزالة أي فراغات)
-                    month_clean = str(m).strip()
-                    month_idx = months_cols.index(month_clean)
-                    return year_int * 12 + month_idx
-                except:
-                    return 0 # في حالة حدوث خطأ نعيد 0 لتجنب الانهيار
-
-            # 1. إنشاء df_stats وتطبيق الدالة
-            df_stats = df.copy()
-            # التأكد من تحويل الأعمدة لنصوص قبل المعالجة
-            df_stats["date_val"] = [get_safe_date_val(y, m) for y, m in zip(df_stats.iloc[:, 0].astype(str), df_stats.iloc[:, 1].astype(str))]
+            # 1. تحديد الشهر المختار في ترتيب قائمة months_cols
+            month_idx_target = months_cols.index(selected_month_t2)
             
-            # 2. الفلترة
-            target_date_val = get_safe_date_val(selected_year_t2, selected_month_t2)
-            df_filtered = df_stats[df_stats["date_val"] <= target_date_val].copy()
+            # 2. فلترة البيانات: نحسب المتأخرات فقط للأشهر المطلوبة
+            df_stats = df.copy()
+            
+            # دالة لحساب التأخير بدقة لكل سطر
+            def calculate_row_retards(row):
+                year_row = int(row["Année / السنة"])
+                year_target = int(selected_year_t2)
+                
+                # إذا كانت السنة أقل من السنة المختارة، نحسب السنة كاملة (12 شهر)
+                if year_row < year_target:
+                    return row[months_cols].astype(str).str.upper().str.contains("NON_PAYE").sum()
+                
+                # إذا كانت السنة تساوي السنة المختارة، نحسب فقط حتى الشهر المختار
+                elif year_row == year_target:
+                    return row[months_cols[:month_idx_target + 1]].astype(str).str.upper().str.contains("NON_PAYE").sum()
+                
+                # إذا كانت السنة أكبر، لا نحسب شيئاً
+                else:
+                    return 0
 
-            # 3. حساب المتأخرات (نفس منطقك السابق)
-            df_filtered["Nb_Retards"] = df_filtered[months_cols].apply(
-                lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
-            )
+            # تطبيق الحساب
+            df_stats["Nb_Retards_Row"] = df_stats.apply(calculate_row_retards, axis=1)
 
-            # 4. التجميع
-            top_debtors = df_filtered.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards"]].sum().reset_index()
+            # 3. التجميع (Groupby)
+            top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
+            top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
+            
+            # فلترة من لديهم تأخير
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
             if not top_debtors.empty:
