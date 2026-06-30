@@ -530,7 +530,7 @@ elif st.session_state.current_page == "Rapports":
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard","📊 Statistiques","📄 Exports"])
         with tab1:st.info
-            St.subheader("💰 Cotisations en retard")
+        St.subheader("💰 Cotisations en retard")
         MONTANT_COTISATION = 300
         VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
         def calculer_retards(row):
