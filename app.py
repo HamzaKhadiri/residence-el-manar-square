@@ -526,131 +526,96 @@ elif st.session_state.current_page == "Trésorerie":
     else:
         st.warning("⚠️ هذه الصفحة مخصصة للمدير فقط.")
 elif st.session_state.current_page == "Rapports":
-    st.subheader("📈 Rapports")  
+    st.subheader("📈 Rapports")
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
+
+        # --- TAB 1: Cotisations en retard ---
         with tab1:
             st.subheader("💰 Cotisations en retard")
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        selected_year = st.selectbox("Année", years_list, key="rep_year")
-    with col2:
-        immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
-        selected_imm = st.selectbox("Immeuble", immeubles_options, key="rep_imm")
-    with col3:
-        selected_month = st.selectbox("Mois de référence", months_cols, key="rep_month")
-    
-    # تحديد نطاق الأشهر
-    month_index = months_cols.index(selected_month)
-    months_to_check = months_cols[:month_index + 1]
+            col1, col2, col3 = st.columns(3)
+            with col1: selected_year_t1 = st.selectbox("Année", years_list, key="year_t1")
+            with col2:
+                immeubles_options = ["الكل"] + sorted(df["Immeuble / الإقامة"].unique().tolist())
+                selected_imm_t1 = st.selectbox("Immeuble", immeubles_options, key="imm_t1")
+            with col3: selected_month_t1 = st.selectbox("Mois de référence", months_cols, key="month_t1")
 
-    MONTANT_COTISATION = 300
-    VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
+            # الحساب
+            month_index_t1 = months_cols.index(selected_month_t1)
+            months_to_check_t1 = months_cols[:month_index_t1 + 1]
+            MONTANT_COTISATION = 300
+            VALEURS_IMPAYE = ["NON_PAYE", "❌ NON_PAYE"]
 
-    # 2. الفلترة المسبقة للـ DataFrame
-    df_filtered = df[df["Année / السنة"].astype(str) == str(selected_year)].copy()
-    if selected_imm != "الكل":
-        df_filtered = df_filtered[df_filtered["Immeuble / الإقامة"] == selected_imm]
+            df_filtered_t1 = df[df["Année / السنة"].astype(str) == str(selected_year_t1)].copy()
+            if selected_imm_t1 != "الكل":
+                df_filtered_t1 = df_filtered_t1[df_filtered_t1["Immeuble / الإقامة"] == selected_imm_t1]
 
-    # 3. حساب المتأخرات
-    retards = []
-    for _, row in df_filtered.iterrows():
-        # فحص الأشهر في النطاق المحدد فقط
-        impayes = [m for m in months_to_check if str(row.get(m, "")).upper().strip() in VALEURS_IMPAYE]
-        nb_impayes = len(impayes)
-        
-        if nb_impayes > 0:
-            retards.append({
-                "Immeuble": row.get("Immeuble / الإقامة"),
-                "Appartement": row.get("Appartement / الشقة"),
-                "Nom": row.get("Nom et prénom / الاسم الكامل"),
-                "Téléphone": row.get("Téléphone / الهاتف"),
-                "Mois impayés": nb_impayes,
-                "Montant dû": nb_impayes * MONTANT_COTISATION
-            })
+            retards = []
+            for _, row in df_filtered_t1.iterrows():
+                impayes = [m for m in months_to_check_t1 if str(row.get(m, "")).upper().strip() in VALEURS_IMPAYE]
+                if len(impayes) > 0:
+                    retards.append({
+                        "Immeuble": row.get("Immeuble / الإقامة"),
+                        "Appartement": row.get("Appartement / الشقة"),
+                        "Nom": row.get("Nom et prénom / الاسم الكامل"),
+                        "Téléphone": row.get("Téléphone / الهاتف"),
+                        "Mois impayés": len(impayes),
+                        "Montant dû": len(impayes) * MONTANT_COTISATION
+                    })
+            
+            df_retards = pd.DataFrame(retards)
+            if df_retards.empty:
+                st.success("✅ Aucun retard de paiement.")
+            else:
+                st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-    df_retards = pd.DataFrame(retards)
-
-    # 4. العرض (هنا نضمن أن البيانات منظمة)
-    if df_retards.empty:
-        st.success("✅ Aucun retard de paiement.")
-    else:
-        # عرض البيانات بدون تداخل
-        st.dataframe(
-            df_retards, 
-            use_container_width=True, 
-            hide_index=True
-        )
-        
+        # --- TAB 2: Statistiques ---
         with tab2:
             st.subheader("📊 Statistiques Globales")
+            col1, col2, col3 = st.columns(3)
+            with col1: selected_year_t2 = st.selectbox("Année", years_list, key="year_t2")
+            with col2: selected_imm_t2 = st.selectbox("Immeuble", immeubles_options, key="imm_t2")
+            with col3: selected_month_t2 = st.selectbox("Mois", months_cols, key="month_t2")
 
-    # حساب البيانات (كما فعلت أنت سابقاً)
-    current_month_index = months_cols.index(selected_month)
-    months_so_far = months_cols[:current_month_index + 1]
-    df_stats = df_filtered.copy()
-    total_months_expected = len(df_stats) * len(months_so_far)
-    
-    paid_count = 0
-    for month in months_so_far:
-        paid_count += df_stats[month].astype(str).str.upper().str.contains("PAYE").sum()
-
-    taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
-
-    # عرض المؤشرات
-    c1, c2, c3 = st.columns(3)
-    c1.metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
-    c2.metric("✅ Mois payés", int(paid_count))
-    c3.metric("📅 Mois attendus", int(total_months_expected))
-
-    st.divider()
-
-    # حساب المتأخرات
-    df_stats["Nb_Retards"] = df_stats[months_so_far].apply(
-        lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
-    )
-    df_stats["Montant dû"] = df_stats["Nb_Retards"] * 300
-    top_debtors = df_stats[df_stats["Nb_Retards"] >= 4].copy()
-
-    if not top_debtors.empty:
-        # تحديد المستوى
-        top_debtors["Alerte"] = top_debtors["Nb_Retards"].apply(
-            lambda x: "🔴 Critique" if x >= 6 else "🟠 Attention"
-        )
-
-        st.subheader("⚠️ Résidents ayant 3 mois de retard ou plus")
-
-        # عرض الجدول مع تنسيق الألوان والأعمدة
-        st.dataframe(
-            top_debtors[["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Téléphone / الهاتف", "Nb_Retards", "Montant dû", "Alerte"]],
-            hide_index=True,
-            use_container_width=True,
-            column_config={
-                "Nb_Retards": st.column_config.NumberColumn("Mois de retard", format="%d ⚠️"),
-                "Montant dû": st.column_config.NumberColumn("Montant dû", format="%d DH"),
-                "Alerte": st.column_config.TextColumn("Niveau")
-            }
-        )
-
-        # زر التحميل
-        csv = top_debtors.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 تحميل قائمة المتأخرين (CSV)",
-            data=csv,
-            file_name='liste_retards_critiques.csv',
-            mime='text/csv',
-        )
-
-        st.markdown("""
-        ### 🟢 Légende
-        - 🟠 **Attention** : entre **3 et 6 mois** de retard.
-        - 🔴 **Critique** : **6 mois ou plus** de retard.
-        """)
-    else:
-        st.success("🎉 Aucun résident n'a plus de 4 mois de retard.")
+            # منطق الفلترة التراكمية (من البداية حتى الشهر المختار)
+            month_idx_t2 = months_cols.index(selected_month_t2)
             
+            # فلترة البيانات
+            df_stats = df.copy()
+            # التصفية حسب السنة والشهر (تراكمي)
+            df_stats = df_stats[df_stats["Année / السنة"].astype(int) <= int(selected_year_t2)]
+            if selected_imm_t2 != "الكل":
+                df_stats = df_stats[df_stats["Immeuble / الإقامة"] == selected_imm_t2]
+
+            # حساب الأشهر المطلوبة والمؤداة
+            months_so_far = months_cols[:month_idx_t2 + 1]
+            total_months_expected = len(df_stats) * len(months_so_far)
+            paid_count = df_stats[months_so_far].apply(lambda x: x.astype(str).str.upper().str.contains("PAYE")).sum().sum()
+            
+            taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
+            
+            c1, c2, c3 = st.columns(3)
+            c1.metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
+            c2.metric("✅ Mois payés", int(paid_count))
+            c3.metric("📅 Mois attendus", int(total_months_expected))
+
+            st.divider()
+            
+            # جدول المتأخرين
+            df_stats["Nb_Retards"] = df_stats[months_so_far].apply(lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1)
+            top_debtors = df_stats[df_stats["Nb_Retards"] >= 4].copy()
+
+            if not top_debtors.empty:
+                top_debtors["Alerte"] = top_debtors["Nb_Retards"].apply(lambda x: "🔴 Critique" if x >= 6 else "🟠 Attention")
+                st.subheader("⚠️ Résidents ayant 4 mois de retard ou plus")
+                st.dataframe(top_debtors[["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Nb_Retards", "Alerte"]], 
+                             use_container_width=True, hide_index=True)
+                
+                csv = top_debtors.to_csv(index=False).encode('utf-8')
+                st.download_button("📥 تحميل قائمة المتأخرين", data=csv, file_name='retards.csv', mime='text/csv')
+            else:
+                st.success("🎉 Aucun retard critique trouvé.")
+
+        # --- TAB 3: Exports ---
         with tab3:
             st.info("🚧 En cours de développement")
-
-
