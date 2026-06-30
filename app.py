@@ -584,7 +584,7 @@ elif st.session_state.current_page == "Rapports":
         )
         
         with tab2:
-    st.subheader("📊 Statistiques Globales")
+            st.subheader("📊 Statistiques Globales")
 
     # حساب البيانات (كما فعلت أنت سابقاً)
     current_month_index = months_cols.index(selected_month)
