@@ -584,7 +584,7 @@ elif st.session_state.current_page == "Rapports":
         )
         
         with tab2: # صفحة الإحصائيات
-    st.subheader("📊 Statistiques Globales")
+            st.subheader("📊 Statistiques Globales")
     
     # 1. إعداد البيانات اللازمة للحسابات
     # نحسب إجمالي الأشهر التي يجب أن تدفع حتى الآن
