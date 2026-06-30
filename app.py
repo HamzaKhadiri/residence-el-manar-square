@@ -583,10 +583,52 @@ elif st.session_state.current_page == "Rapports":
             hide_index=True
         )
         
-        
+        with tab2: # صفحة الإحصائيات
+    st.subheader("📊 Statistiques Globales")
+    
+    # 1. إعداد البيانات اللازمة للحسابات
+    # نحسب إجمالي الأشهر التي يجب أن تدفع حتى الآن
+    current_month_index = months_cols.index(selected_month) # نفترض أن selected_month معرف في تاب 1
+    months_so_far = months_cols[:current_month_index + 1]
+    
+    total_months_expected = len(df) * len(months_so_far)
+    
+    # نحسب كم شهر تم دفعه فعلياً (نبحث عن الكلمات التي تدل على الدفع)
+    # عدل "PAYE" لتطابق ما تستخدمه في ملف الإكسل (مثلا "PAYE" أو "✅ PAYE")
+    paid_count = df[months_so_far].apply(lambda x: x.str.upper().str.contains("PAYE")).sum().sum()
+    
+    taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
+    
+    # 2. عرض المؤشرات (Metrics)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("معدل التحصيل", f"{taux_recouvrement:.1f}%")
+    c2.metric("إجمالي الأشهر المحصلة", paid_count)
+    c3.metric("إجمالي الأشهر المطلوبة", total_months_expected)
 
-        with tab2:
-            st.info("🚧 En cours de développement")
+    st.divider()
+
+    # 3. جدول "أكثر المتأخرين" (Top Debtors)
+    st.subheader("⚠️ قائمة الأكثر تأخراً (Top Debtors)")
+    
+    # حساب عدد الأشهر غير المدفوعة لكل ساكن
+    df["Nb_Retards"] = df[months_so_far].apply(lambda x: x.str.upper().str.contains("NON_PAYE")).sum(axis=1)
+    
+    # فلترة من لديهم تأخيرات فقط وترتيبهم من الأكثر تأخراً
+    top_debtors = df[df["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
+    
+    # عرض فقط الأعمدة المهمة
+    cols_to_show = ["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Nb_Retards"]
+    if not top_debtors.empty:
+        st.dataframe(
+            top_debtors[cols_to_show],
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Nb_Retards": st.column_config.NumberColumn("عدد أشهر التأخير", format="%d ⚠️")
+            }
+        )
+    else:
+        st.success("🎉 لا توجد متأخرات، كل الساكنة ملتزمون!")
             
         with tab3:
             st.info("🚧 En cours de développement")
