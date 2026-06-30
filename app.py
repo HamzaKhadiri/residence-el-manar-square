@@ -548,7 +548,7 @@ elif st.session_state.current_page == "Rapports":
         })
     return None
 df_retards = df.apply(calculer_retards, axis=1).dropna(how='all')
-        with tab2:st.info("🚧 En cours de développement")
-        with tab3:st.info("🚧 En cours de développement") 
+with tab2:st.info("🚧 En cours de développement")
+with tab3:st.info("🚧 En cours de développement") 
 
 
