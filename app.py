@@ -385,8 +385,8 @@ elif st.session_state.current_page == "Cotisations":
                     df_user_cotis[month] = df_user_cotis[month].apply(lambda x: '✅' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌')
             st.dataframe(df_user_cotis, use_container_width=True, hide_index=True)
             
-elif st.session_state.current_page == "Rapports des cotisation":
-    st.subheader("📈 Rapports des cotisation")
+elif st.session_state.current_page == "Rapports des cotisations":
+    st.subheader("📈 Rapports des cotisations")
     if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
 
