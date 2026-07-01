@@ -240,8 +240,9 @@ if "current_page" not in st.session_state: st.session_state.current_page = "Tabl
 nav_cols = st.columns(4)
 if nav_cols[0].button("📊 Tableau de bord"): st.session_state.current_page = "Tableau de bord"
 if nav_cols[1].button("💵 Cotisations"): st.session_state.current_page = "Cotisations"
-if nav_cols[2].button("🏦 Trésorerie"): st.session_state.current_page = "Trésorerie"
-if nav_cols[3].button("📈 Rapports"): st.session_state.current_page = "Rapports" 
+if nav_cols[2].button("📈 Rapports des cotisations"): st.session_state.current_page = "Rapports des cotisations"
+if nav_cols[3].button("🏦 Trésorerie"): st.session_state.current_page = "Trésorerie"
+ 
     
 # --- القائمة الجانبية (لرفع صلاحية الأدمن) ---
 st.sidebar.markdown("### ⚙️ Configuration")
