@@ -604,7 +604,7 @@ elif st.session_state.current_page == "Rapports":
             df_stats["Nb_Retards_Row"] = df_stats.apply(calculate_row_retards, axis=1)
 
             # 3. التجميع (Groupby)
-            top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
+            top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Immeuble / الإقامة", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
             
             # فلترة من لديهم تأخير
