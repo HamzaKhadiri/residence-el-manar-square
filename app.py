@@ -617,14 +617,7 @@ elif st.session_state.current_page == "Rapports":
                     else: return "🟡 Surveillance (1-3 mois)"
 
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
-                
-                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
-                st.dataframe(top_debtors, use_container_width=True, hide_index=True)
-            else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
-
-
-# ====== حساب القيم ======
+                # ====== حساب القيم ======
 nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
 nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
 nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
@@ -646,4 +639,10 @@ with c3:
 with c4:
     st.metric("🟡 Surveillance", nb_surveillance)
 
-st.divider()
+st.divider() 
+                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
+                st.dataframe(top_debtors, use_container_width=True, hide_index=True)
+            else:
+                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
+
+
