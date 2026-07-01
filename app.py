@@ -641,7 +641,21 @@ with c4:
 
 st.divider() 
 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
-    st.dataframe(top_debtors, use_container_width=True, hide_index=True)
+
+if not top_debtors.empty:
+    # حساب عدد الصفوف لعرض الجدول بحجم مناسب
+    # 35 هو ارتفاع الصف الواحد تقريبًا بـ pixels، نضربه في عدد الصفوف + هامش للرأس
+    row_height = 35
+    total_height = (len(top_debtors) * row_height) + 40 
+    
+    # نضع حداً أقصى للارتفاع (مثلاً 500 بكسل) حتى لا يطول الجدول كثيراً في حال وجود عدد كبير من السكان
+    final_height = min(total_height, 500)
+    
+    st.dataframe(
+        top_debtors, 
+        use_container_width=True, 
+        hide_index=True,
+        height=final_height  # هنا يتم التحكم في الارتفاع ديناميكياً
+    )
 else:
     st.success("🎉 لا توجد متأخرات في هذه الفترة.")
-
