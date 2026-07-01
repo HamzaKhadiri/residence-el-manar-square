@@ -614,7 +614,6 @@ elif st.session_state.current_page == "Rapports":
                 def get_alert_color(n):
                     if n >= 6: return "🔴 Critique (6+ mois)"
                     elif n >= 3: return "🟠 Attention (3-6 mois)"
-                    else: return "🟡 Surveillance (1-3 mois)"
 
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 # ====== حساب القيم ======
@@ -635,9 +634,6 @@ with c2:
 
 with c3:
     st.metric("🟠 Attention", nb_attention)
-
-with c4:
-    st.metric("🟡 Surveillance", nb_surveillance)
 
 st.divider() 
 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
