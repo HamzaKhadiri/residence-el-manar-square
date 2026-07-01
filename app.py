@@ -623,4 +623,10 @@ elif st.session_state.current_page == "Rapports":
                 hide_index=True,
                 height=int(dynamic_height)
             )
+            st.markdown("""
+        ### 🟢 Légende
+        - 🟠 **Attention** : entre **3 et 6 mois** de retard.
+        - 🔴 **Critique** : **6 mois ou plus** de retard.
+        """)
+
       
