@@ -625,7 +625,6 @@ elif st.session_state.current_page == "Rapports":
                 )
 
                 st.divider()
-                st.subheader(f"⚠️ الوضعية التراكمية المفصلة")
 
                 dynamic_height = (len(top_debtors) * 35) + 50
                 st.dataframe(
