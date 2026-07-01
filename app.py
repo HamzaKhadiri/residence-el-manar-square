@@ -580,60 +580,53 @@ elif st.session_state.current_page == "Rapports":
             # 1. تحديد الشهر المختار في ترتيب قائمة months_cols
             month_idx_target = months_cols.index(selected_month_t2)
             
-            # 2. فلترة البيانات: نحسب المتأخرات فقط للأشهر المطلوبة
+            # 2. فلترة البيانات
             df_stats = df.copy()
             
-            # دالة لحساب التأخير بدقة لكل سطر
+            # دالة حساب التأخير
             def calculate_row_retards(row):
                 year_row = int(row["Année / السنة"])
                 year_target = int(selected_year_t2)
-                
-                # إذا كانت السنة أقل من السنة المختارة، نحسب السنة كاملة (12 شهر)
                 if year_row < year_target:
                     return row[months_cols].astype(str).str.upper().str.contains("NON_PAYE").sum()
-                
-                # إذا كانت السنة تساوي السنة المختارة، نحسب فقط حتى الشهر المختار
                 elif year_row == year_target:
                     return row[months_cols[:month_idx_target + 1]].astype(str).str.upper().str.contains("NON_PAYE").sum()
-                
-                # إذا كانت السنة أكبر، لا نحسب شيئاً
                 else:
                     return 0
 
-            # تطبيق الحساب
             df_stats["Nb_Retards_Row"] = df_stats.apply(calculate_row_retards, axis=1)
 
-            # 3. التجميع (Groupby)
+            # 3. التجميع
             top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Immeuble / الإقامة", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
-# نضع كل العرض داخل هذا الشرط لضمان عدم حدوث NameError
-if not top_debtors.empty:
-    top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
-    
-    # ====== حساب القيم ======
-    nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
-    nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
-    nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
-    nb_total = len(top_debtors)
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: st.metric("👥 Total", nb_total)
-    with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
-    with c3: st.metric("🟠 Attention", nb_attention)
-    with c4: st.metric("🟡 Surveillance", nb_surveillance)
-    
-    st.divider() 
-    st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
+            # 4. العرض (كل هذا الكود أصبح الآن داخل الـ with tab2)
+            if not top_debtors.empty:
+                top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
+                
+                # ====== حساب القيم ======
+                nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
+                nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
+                nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
+                nb_total = len(top_debtors)
+                
+                c1, c2, c3, c4 = st.columns(4)
+                with c1: st.metric("👥 Total", nb_total)
+                with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
+                with c3: st.metric("🟠 Attention", nb_attention)
+                with c4: st.metric("🟡 Surveillance", nb_surveillance)
+                
+                st.divider() 
+                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
-    # حساب الارتفاع الديناميكي
-    dynamic_height = (len(top_debtors) * 35) + 50
-    st.dataframe(
-        top_debtors, 
-        use_container_width=True, 
-        hide_index=True,
-        height=int(dynamic_height)
-    )
-else:
-    # في حال لا توجد بيانات، نظهر رسالة لطيفة فقط
-    st.success("🎉 لا توجد متأخرات في هذه الفترة.")
+                # حساب الارتفاع الديناميكي
+                dynamic_height = (len(top_debtors) * 35) + 50
+                st.dataframe(
+                    top_debtors, 
+                    use_container_width=True, 
+                    hide_index=True,
+                    height=int(dynamic_height)
+                )
+            else:
+                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
