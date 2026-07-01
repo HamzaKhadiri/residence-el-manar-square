@@ -600,10 +600,6 @@ elif st.session_state.current_page == "Rapports":
             top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Immeuble / الإقامة", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
-
-            # 4. العرض (كل هذا الكود أصبح الآن داخل الـ with tab2)
-            if not top_debtors.empty:
-                top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 
                 # ====== حساب القيم ======
                 nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
