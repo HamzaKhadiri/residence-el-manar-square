@@ -607,14 +607,14 @@ elif st.session_state.current_page == "Rapports":
             nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
             nb_total = len(top_debtors)
                 
-                c1, c2, c3, c4 = st.columns(4)
-                with c1: st.metric("👥 Total", nb_total)
-                with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
-                with c3: st.metric("🟠 Attention", nb_attention)
-                with c4: st.metric("🟡 Surveillance", nb_surveillance)
+            c1, c2, c3, c4 = st.columns(4)
+            with c1: st.metric("👥 Total", nb_total)
+            with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
+            with c3: st.metric("🟠 Attention", nb_attention)
+            with c4: st.metric("🟡 Surveillance", nb_surveillance)
                 
-                st.divider() 
-                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
+            st.divider() 
+            st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
                 # حساب الارتفاع الديناميكي
                 dynamic_height = (len(top_debtors) * 35) + 50
