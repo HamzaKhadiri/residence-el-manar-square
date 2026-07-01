@@ -621,16 +621,7 @@ elif st.session_state.current_page == "Rapports":
                 
                 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
-if not top_debtors.empty:
-    # نقوم بحساب الارتفاع بناءً على عدد الصفوف + مساحة للرأس (Header)
-    # 35 هو ارتفاع الصف الواحد تقريباً، نضيف 50 بكسل لرأس الجدول
-    dynamic_height = (len(top_debtors) * 35) + 50
-    
-    st.dataframe(
-        top_debtors, 
-        use_container_width=True, 
-        hide_index=True,
-        height=dynamic_height # هنا ستظهر كل الصفوف مهما كان عددها
-    )
+            if not top_debtors.empty: dynamic_height = (len(top_debtors) * 35) + 50
+                st.dataframe(top_debtors, use_container_width=True, hide_index=True, height=dynamic_height # هنا ستظهر كل الصفوف مهما كان عددها)
             else:
                 st.success("🎉 لا توجد متأخرات في هذه الفترة.")
