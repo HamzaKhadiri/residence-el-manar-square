@@ -614,7 +614,7 @@ elif st.session_state.current_page == "Rapports":
                 def get_alert_color(n):
                     if n >= 6: return "🔴 Critique (6+ mois)"
                     elif n >= 3: return "🟠 Attention (3-6 mois)"
-
+                    elif n >= 1: return "🟡 Surveillance (1-3 mois)"
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 # ====== حساب القيم ======
 nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
@@ -628,9 +628,12 @@ c1, c2, c3, c4 = st.columns(4)
 # استخدام st.container مع border=True لإعطاء مظهر "البطاقة" (متوفر في نسخ Streamlit الحديثة)
 with c1:
     st.metric("👥 Total", nb_total)
-with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
-with c3: st.metric("🟠 Attention", nb_attention)
-with c4: st.metric("🟡 Surveillance", nb_surveillance)
+with c2:
+    st.metric("🔴 Critique", nb_critique, delta_color="inverse")
+with c3:
+    st.metric("🟠 Attention", nb_attention)
+with c4:
+    st.metric("🟡 Surveillance", nb_surveillance)
 st.divider() 
 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
