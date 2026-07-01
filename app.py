@@ -617,8 +617,6 @@ if not top_debtors.empty:
     nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
     nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
     nb_total = len(top_debtors)
-
-    # ====== عرض البطاقات ======
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.metric("👥 Total", nb_total)
     with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
