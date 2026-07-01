@@ -433,6 +433,12 @@ elif st.session_state.current_page == "Rapports des cotisations":
         # --- TAB 2: Statistiques (النسخة الدقيقة) ---
         with tab2:
             st.subheader("📊 Statistiques Globales (Cumulatif)")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
+            c2.metric("✅ Mois payés", int(paid_count))
+            c3.metric("📅 Mois attendus", int(total_months_expected))
+
+            st.divider()
             
             col1, col2 = st.columns(2)
             with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
