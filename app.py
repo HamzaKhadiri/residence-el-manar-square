@@ -571,19 +571,24 @@ elif st.session_state.current_page == "Rapports":
 
         # --- TAB 2: Statistiques ---
         with tab2:
-            st.subheader("📊 Statistiques Globales")
-
-            # حساب البيانات
-            current_month_index = months_cols.index(selected_month)
-            months_so_far = months_cols[:current_month_index + 1]
-            df_stats = df_filtered.copy()
-            total_months_expected = len(df_stats) * len(months_so_far)
+            st.subheader("📊 Statistiques Globales (Cumulatif)")
             
-            paid_count = 0
-            for month in months_so_far:
-                paid_count += df_stats[month].astype(str).str.upper().str.contains("PAYE").sum()
+            col1, col2 = st.columns(2)
+            with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
+            with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
-            taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
+            month_idx_target = months_cols.index(selected_month_t2)
+            df_stats = df.copy()
+            
+            def calculate_row_retards(row):
+                year_row = int(row["Année / السنة"])
+                year_target = int(selected_year_t2)
+                if year_row < year_target:
+                    return row[months_cols].astype(str).str.upper().str.contains("NON_PAYE").sum()
+                elif year_row == year_target:
+                    return row[months_cols[:month_idx_target + 1]].astype(str).str.upper().str.contains("NON_PAYE").sum()
+                else:
+                    return 0
 
             # عرض المؤشرات
             c1, c2, c3 = st.columns(3)
