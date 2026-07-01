@@ -607,46 +607,39 @@ elif st.session_state.current_page == "Rapports":
             top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Immeuble / الإقامة", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
             
-            # فلترة من لديهم تأخير
-            top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
+            # ... (كود التجميع Groupby السابق)
 
-            if not top_debtors.empty:
-                def get_alert_color(n):
-                    if n >= 6: return "🔴 Critique (6+ mois)"
-                    elif n >= 3: return "🟠 Attention (3-6 mois)"
-                    elif n >= 1: return "🟡 Surveillance (1-3 mois)"
-                top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
-                # ====== حساب القيم ======
-nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
-nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
-nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
-nb_total = len(top_debtors)
+# فلترة من لديهم تأخير
+top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
-# ====== عرض البطاقات ======
-c1, c2, c3, c4 = st.columns(4)
-
-# استخدام st.container مع border=True لإعطاء مظهر "البطاقة" (متوفر في نسخ Streamlit الحديثة)
-with c1:
-    st.metric("👥 Total", nb_total)
-with c2:
-    st.metric("🔴 Critique", nb_critique, delta_color="inverse")
-with c3:
-    st.metric("🟠 Attention", nb_attention)
-with c4:
-    st.metric("🟡 Surveillance", nb_surveillance)
-st.divider() 
-st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
-
+# نضع كل العرض داخل هذا الشرط لضمان عدم حدوث NameError
 if not top_debtors.empty:
-    # نقوم بحساب الارتفاع بناءً على عدد الصفوف + مساحة للرأس (Header)
-    # 35 هو ارتفاع الصف الواحد تقريباً، نضيف 50 بكسل لرأس الجدول
-    dynamic_height = (len(top_debtors) * 35) + 50
+    top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
     
+    # ====== حساب القيم ======
+    nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
+    nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
+    nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
+    nb_total = len(top_debtors)
+
+    # ====== عرض البطاقات ======
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: st.metric("👥 Total", nb_total)
+    with c2: st.metric("🔴 Critique", nb_critique, delta_color="inverse")
+    with c3: st.metric("🟠 Attention", nb_attention)
+    with c4: st.metric("🟡 Surveillance", nb_surveillance)
+    
+    st.divider() 
+    st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
+
+    # حساب الارتفاع الديناميكي
+    dynamic_height = (len(top_debtors) * 35) + 50
     st.dataframe(
         top_debtors, 
         use_container_width=True, 
         hide_index=True,
-        height=dynamic_height # هنا ستظهر كل الصفوف مهما كان عددها
+        height=int(dynamic_height)
     )
 else:
+    # في حال لا توجد بيانات، نظهر رسالة لطيفة فقط
     st.success("🎉 لا توجد متأخرات في هذه الفترة.")
