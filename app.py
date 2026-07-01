@@ -488,7 +488,7 @@ elif st.session_state.current_page == "Rapports des cotisations":
                     height=dynamic_height
                 )
             else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة."
+                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
 elif st.session_state.current_page == "Trésorerie":
     st.subheader("🏦 Trésorerie / الخزينة")  
     if is_admin:
