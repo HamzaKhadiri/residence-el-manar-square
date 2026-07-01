@@ -618,21 +618,23 @@ elif st.session_state.current_page == "Rapports":
 
                 top_debtors["Niveau"] = top_debtors["Nb_Retards"].apply(get_alert_color)
                 
-                St.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
-# ====== Cartes statistiques ======
+                st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
+# ====== حساب القيم ======
 nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
 nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
 nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
 nb_total = len(top_debtors)
 
+# ====== عرض البطاقات ======
 c1, c2, c3, c4 = st.columns(4)
 
+# استخدام st.container مع border=True لإعطاء مظهر "البطاقة" (متوفر في نسخ Streamlit الحديثة)
 with c1:
     st.metric("👥 Total", nb_total)
 
 with c2:
-    st.metric("🔴 Critique", nb_critique)
+    st.metric("🔴 Critique", nb_critique, delta_color="inverse")
 
 with c3:
     st.metric("🟠 Attention", nb_attention)
