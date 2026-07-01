@@ -435,7 +435,7 @@ elif st.session_state.current_page == "Rapports des cotisations":
             st.subheader("📊 Statistiques Globales (Cumulatif)")
             taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
             c1 = st.columns(1)
-            c1.metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
+            c1[0].metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
             st.divider()
             
             col1, col2 = st.columns(2)
