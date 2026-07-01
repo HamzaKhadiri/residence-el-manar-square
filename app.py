@@ -489,6 +489,9 @@ elif st.session_state.current_page == "Rapports des cotisations":
                 )
             else:
                 st.success("🎉 لا توجد متأخرات في هذه الفترة.")
+    else:
+        st.warning("⚠️ هذه الصفحة مخصصة للمدير فقط.")
+
 elif st.session_state.current_page == "Trésorerie":
     st.subheader("🏦 Trésorerie / الخزينة")  
     if is_admin:
