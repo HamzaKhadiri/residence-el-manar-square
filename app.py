@@ -601,8 +601,8 @@ elif st.session_state.current_page == "Rapports":
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
             top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
                 
-                # ====== حساب القيم ======
-                nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
+           
+            nb_critique = len(top_debtors[top_debtors["Nb_Retards"] >= 6])
                 nb_attention = len(top_debtors[(top_debtors["Nb_Retards"] >= 3) & (top_debtors["Nb_Retards"] < 6)])
                 nb_surveillance = len(top_debtors[(top_debtors["Nb_Retards"] >= 1) & (top_debtors["Nb_Retards"] < 3)])
                 nb_total = len(top_debtors)
