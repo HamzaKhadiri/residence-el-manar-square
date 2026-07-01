@@ -626,13 +626,6 @@ elif st.session_state.current_page == "Rapports":
 
                 st.divider()
 
-                dynamic_height = (len(top_debtors) * 35) + 50
-                st.dataframe(
-                    top_debtors, 
-                    use_container_width=True, 
-                    hide_index=True,
-                    height=int(dynamic_height)
-                )
             else:
                 st.success("🎉 Aucun résident n'a plus de 4 mois de retard.")
 
