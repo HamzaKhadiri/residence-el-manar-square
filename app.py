@@ -623,5 +623,5 @@ elif st.session_state.current_page == "Rapports":
                 hide_index=True,
                 height=int(dynamic_height)
             )
-            else:
-                st.success("🎉 لا توجد متأخرات في هذه الفترة.")
+        else:
+            st.success("🎉 لا توجد متأخرات في هذه الفترة.")
