@@ -616,13 +616,12 @@ elif st.session_state.current_page == "Rapports":
             st.divider() 
             st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 
-                # حساب الارتفاع الديناميكي
-                dynamic_height = (len(top_debtors) * 35) + 50
-                st.dataframe(
-                    top_debtors, 
-                    use_container_width=True, 
-                    hide_index=True,
-                    height=int(dynamic_height)
-                )
+            dynamic_height = (len(top_debtors) * 35) + 50
+            st.dataframe(
+                top_debtors, 
+                use_container_width=True, 
+                hide_index=True,
+                height=int(dynamic_height)
+            )
             else:
                 st.success("🎉 لا توجد متأخرات في هذه الفترة.")
