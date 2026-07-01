@@ -642,7 +642,7 @@ with c4:
 st.divider() 
 st.subheader(f"⚠️ الوضعية التراكمية حتى {selected_month_t2} {selected_year_t2}")
 st.dataframe(top_debtors, use_container_width=True, hide_index=True)
- else:
+else:
      st.success("🎉 لا توجد متأخرات في هذه الفترة.")
 
 
