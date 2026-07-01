@@ -387,7 +387,7 @@ elif st.session_state.current_page == "Cotisations":
             
 elif st.session_state.current_page == "Rapports Des cotisation":
     st.subheader("📈 Rapports Des cotisation")
-        if is_admin:
+    if is_admin:
         tab1, tab2, tab3 = st.tabs(["💰 Cotisations en retard", "📊 Statistiques", "📄 Exports"])
 
         # --- TAB 1: Cotisations en retard ---
