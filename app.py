@@ -432,7 +432,6 @@ elif st.session_state.current_page == "Rapports des cotisations":
        # --- TAB 2: Statistiques ---
         with tab2:
     st.subheader("📊 Statistiques Globales (Cumulatif)")
-    
     col1, col2 = st.columns(2)
     with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
     with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
