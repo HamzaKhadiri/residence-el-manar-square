@@ -569,7 +569,7 @@ elif st.session_state.current_page == "Rapports":
             else:
                 st.dataframe(df_retards, use_container_width=True, hide_index=True)
 
-        # --- TAB 2: Statistiques ---
+       # --- TAB 2: Statistiques ---
         with tab2:
             st.subheader("📊 Statistiques Globales (Cumulatif)")
             
@@ -577,20 +577,20 @@ elif st.session_state.current_page == "Rapports":
             with col1: selected_year_t2 = st.selectbox("Année cible", years_list, key="year_t2")
             with col2: selected_month_t2 = st.selectbox("Mois cible", months_cols, key="month_t2")
 
+            # 1. الحسابات الأساسية (يجب أن تكون قبل العرض)
             month_idx_target = months_cols.index(selected_month_t2)
+            months_so_far = months_cols[:month_idx_target + 1]
             df_stats = df.copy()
             
-            def calculate_row_retards(row):
-                year_row = int(row["Année / السنة"])
-                year_target = int(selected_year_t2)
-                if year_row < year_target:
-                    return row[months_cols].astype(str).str.upper().str.contains("NON_PAYE").sum()
-                elif year_row == year_target:
-                    return row[months_cols[:month_idx_target + 1]].astype(str).str.upper().str.contains("NON_PAYE").sum()
-                else:
-                    return 0
+            # حساب الإحصائيات (Taux de recouvrement)
+            total_months_expected = len(df_stats) * len(months_so_far)
+            paid_count = 0
+            for month in months_so_far:
+                paid_count += df_stats[month].astype(str).str.upper().str.contains("PAYE").sum()
+            
+            taux_recouvrement = (paid_count / total_months_expected) * 100 if total_months_expected > 0 else 0
 
-            # عرض المؤشرات
+            # 2. عرض المؤشرات (الآن المتغيرات معرفة ولن يظهر خطأ)
             c1, c2, c3 = st.columns(3)
             c1.metric("📈 Taux de recouvrement", f"{taux_recouvrement:.1f}%")
             c2.metric("✅ Mois payés", int(paid_count))
@@ -598,24 +598,21 @@ elif st.session_state.current_page == "Rapports":
 
             st.divider()
 
-            # حساب المتأخرات
+            # 3. حساب المتأخرات
             df_stats["Nb_Retards"] = df_stats[months_so_far].apply(
                 lambda x: x.astype(str).str.upper().str.contains("NON_PAYE").sum(), axis=1
             )
             df_stats["Montant dû"] = df_stats["Nb_Retards"] * 300
             
-            # فلترة المتأخرين (4 أشهر أو أكثر)
+            # فلترة المتأخرين
             top_debtors = df_stats[df_stats["Nb_Retards"] >= 4].copy()
 
             if not top_debtors.empty:
-                # تحديد المستوى
                 top_debtors["Alerte"] = top_debtors["Nb_Retards"].apply(
                     lambda x: "🔴 Critique" if x >= 6 else "🟠 Attention"
                 )
 
                 st.subheader("⚠️ Résidents ayant 4 mois de retard ou plus")
-
-                # عرض الجدول الأول
                 st.dataframe(
                     top_debtors[["Nom et prénom / الاسم الكامل", "Appartement / الشقة", "Téléphone / الهاتف", "Nb_Retards", "Montant dû", "Alerte"]],
                     hide_index=True,
@@ -630,7 +627,6 @@ elif st.session_state.current_page == "Rapports":
                 st.divider()
                 st.subheader(f"⚠️ الوضعية التراكمية المفصلة")
 
-                # عرض الجدول الثاني (الارتفاع الديناميكي)
                 dynamic_height = (len(top_debtors) * 35) + 50
                 st.dataframe(
                     top_debtors, 
