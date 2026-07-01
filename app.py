@@ -606,11 +606,7 @@ elif st.session_state.current_page == "Rapports":
             # 3. التجميع (Groupby)
             top_debtors = df_stats.groupby(["Nom et prénom / الاسم الكامل", "Immeuble / الإقامة", "Appartement / الشقة"])[["Nb_Retards_Row"]].sum().reset_index()
             top_debtors.rename(columns={"Nb_Retards_Row": "Nb_Retards"}, inplace=True)
-            
-            # ... (كود التجميع Groupby السابق)
-
-# فلترة من لديهم تأخير
-top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
+            top_debtors = top_debtors[top_debtors["Nb_Retards"] > 0].sort_values(by="Nb_Retards", ascending=False)
 
 # نضع كل العرض داخل هذا الشرط لضمان عدم حدوث NameError
 if not top_debtors.empty:
