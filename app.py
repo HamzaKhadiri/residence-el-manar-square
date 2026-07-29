@@ -255,33 +255,58 @@ if password == "1234":
 # ==================== عرض المحتوى ====================
 
 # --- 1. لوحة التحكم (Tableau de bord) ---
+# 1. لوحة التحكم
 if st.session_state.current_page == "Tableau de bord":
     st.subheader("📊 Tableau de bord")
+    years_list_db = sorted(df["Année / السنة"].dropna().unique().astype(str).tolist()) if not df.empty else years_list
+    selected_year = st.selectbox("اختر السنة / Sélectionnez l'année", years_list_db)
     
-    # 1. جلب السنوات المتاحة (تأكد أن العمود سميتو "Année / السنة")
-    years_list = sorted(df["Année / السنة"].dropna().unique().astype(str).tolist())
-    selected_year = st.selectbox("اختر السنة / Sélectionnez l'année", years_list)
-    
-    # 2. منطق الأدمن
     if is_admin:
         sel_imm_dash = st.selectbox("Filtrer par Immeuble", ["Tous"] + immeubles_list)
         df_dash = df.copy()
         df_dash = df_dash[df_dash["Année / السنة"].astype(str) == selected_year]
-        
         if sel_imm_dash != "Tous":
             df_dash = df_dash[df_dash["Immeuble / الإقامة"] == sel_imm_dash]
         
+        # --- إضافة مؤشرات الأداء السريعة (KPIs) ---
+        if not df_dash.empty:
+            total_appartements = len(df_dash)
+            current_month_name = months_cols[datetime.now().month - 1]
+            
+            # حساب عدد الشقق التي أدت في الشهر الحالي
+            paid_current_month = 0
+            if current_month_name in df_dash.columns:
+                paid_current_month = df_dash[current_month_name].astype(str).str.strip().str.upper().str.contains("PAYE").sum()
+            
+            montant_collecte = paid_current_month * 300
+            taux_recouvrement = (paid_current_month / total_appartements * 100) if total_appartements > 0 else 0
+
+            k1, k2, k3, k4 = st.columns(4)
+            with k1:
+                st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
+                <div style="color:#aaa;font-size:14px;">🏠 إجمالي الشقق</div>
+                <div style="color:#fff;font-size:22px;font-weight:bold;">{total_appartements}</div></div>""", unsafe_allow_html=True)
+            with k2:
+                st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
+                <div style="color:#aaa;font-size:14px;">✅ أدو, الشهر الحالي</div>
+                <div style="color:#2ecc71;font-size:22px;font-weight:bold;">{paid_current_month}</div></div>""", unsafe_allow_html=True)
+            with k3:
+                st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
+                <div style="color:#aaa;font-size:14px;">💵 المداخل المحصلة</div>
+                <div style="color:#f39c12;font-size:22px;font-weight:bold;">{montant_collecte:,.2f} MAD</div></div>""", unsafe_allow_html=True)
+            with k4:
+                st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
+                <div style="color:#aaa;font-size:14px;">📈 نسبة الأداء</div>
+                <div style="color:#3498db;font-size:22px;font-weight:bold;">{taux_recouvrement:.1f}%</div></div>""", unsafe_allow_html=True)
+            
+            st.divider()
+
         columns_to_show_admin = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف"]
-        st.dataframe(df_dash[columns_to_show_admin], use_container_width=True, hide_index=True, height=750)
-    
-    # 3. منطق المستخدم العادي
+        st.dataframe(df_dash[columns_to_show_admin], use_container_width=True, hide_index=True, height=600)
     else:
-        # البحث عن اسم المستخدم في Supabase-based DataFrame
         df_user = df[df["Nom et prénom / الاسم الكامل"].str.contains(st.session_state.user_name, case=False, na=False)]
         df_user = df_user[df_user["Année / السنة"].astype(str) == selected_year]
-        
         columns_to_show = ["Immeuble / الإقامة", "Appartement / الشقة", "Nom et prénom / الاسم الكامل", "Téléphone / الهاتف"]
-        
         if not df_user.empty:
             st.dataframe(df_user[columns_to_show], use_container_width=True, hide_index=True)
         else:
