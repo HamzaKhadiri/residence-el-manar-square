@@ -256,6 +256,7 @@ if password == "1234":
 
 # --- 1. لوحة التحكم (Tableau de bord) ---
 # 1. لوحة التحكم
+# 1. لوحة التحكم
 if st.session_state.current_page == "Tableau de bord":
     st.subheader("📊 Tableau de bord")
     years_list_db = sorted(df["Année / السنة"].dropna().unique().astype(str).tolist()) if not df.empty else years_list
@@ -268,36 +269,38 @@ if st.session_state.current_page == "Tableau de bord":
         if sel_imm_dash != "Tous":
             df_dash = df_dash[df_dash["Immeuble / الإقامة"] == sel_imm_dash]
         
-        # --- إضافة مؤشرات الأداء السريعة (KPIs) ---
+        # --- حساب مؤشرات الأداء بناءً على صفحة الاشتراكات والسنة/الإقامة المختارين ---
         if not df_dash.empty:
             total_appartements = len(df_dash)
-            current_month_name = months_cols[datetime.now().month - 1]
             
-            # حساب عدد الشقق التي أدت في الشهر الحالي
-            paid_current_month = 0
-            if current_month_name in df_dash.columns:
-                paid_current_month = df_dash[current_month_name].astype(str).str.strip().str.upper().str.contains("PAYE").sum()
+            # حساب إجمالي الأشهر المؤداة مقارنة بإجمالي الأشهر الممكنة للسنة المختارة
+            total_months_possible = total_appartements * len(months_cols)
+            total_months_paid = 0
             
-            montant_collecte = paid_current_month * 300
-            taux_recouvrement = (paid_current_month / total_appartements * 100) if total_appartements > 0 else 0
+            for month in months_cols:
+                if month in df_dash.columns:
+                    total_months_paid += df_dash[month].astype(str).str.strip().str.upper().str.contains("PAYE").sum()
+            
+            taux_recouvrement_annee = (total_months_paid / total_months_possible * 100) if total_months_possible > 0 else 0
+            montant_total_collecte = total_months_paid * 300
 
             k1, k2, k3, k4 = st.columns(4)
             with k1:
                 st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
-                <div style="color:#aaa;font-size:14px;">🏠 إجمالي الشقق</div>
+                <div style="color:#aaa;font-size:14px;">🏠 عدد الشقق ({sel_imm_dash})</div>
                 <div style="color:#fff;font-size:22px;font-weight:bold;">{total_appartements}</div></div>""", unsafe_allow_html=True)
             with k2:
                 st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
-                <div style="color:#aaa;font-size:14px;">✅ أدو, الشهر الحالي</div>
-                <div style="color:#2ecc71;font-size:22px;font-weight:bold;">{paid_current_month}</div></div>""", unsafe_allow_html=True)
+                <div style="color:#aaa;font-size:14px;">✅ الأشهر المؤداة</div>
+                <div style="color:#2ecc71;font-size:22px;font-weight:bold;">{total_months_paid} / {total_months_possible}</div></div>""", unsafe_allow_html=True)
             with k3:
                 st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
-                <div style="color:#aaa;font-size:14px;">💵 المداخل المحصلة</div>
-                <div style="color:#f39c12;font-size:22px;font-weight:bold;">{montant_collecte:,.2f} MAD</div></div>""", unsafe_allow_html=True)
+                <div style="color:#aaa;font-size:14px;">💵 المداخيل المحصلة (السنة)</div>
+                <div style="color:#f39c12;font-size:22px;font-weight:bold;">{montant_total_collecte:,.2f} MAD</div></div>""", unsafe_allow_html=True)
             with k4:
                 st.markdown(f"""<div style="background:#111; padding:15px; border-radius:12px; text-align:center; border:1px solid #333;">
-                <div style="color:#aaa;font-size:14px;">📈 نسبة الأداء</div>
-                <div style="color:#3498db;font-size:22px;font-weight:bold;">{taux_recouvrement:.1f}%</div></div>""", unsafe_allow_html=True)
+                <div style="color:#aaa;font-size:14px;">📈 نسبة الأداء السنوية</div>
+                <div style="color:#3498db;font-size:22px;font-weight:bold;">{taux_recouvrement_annee:.1f}%</div></div>""", unsafe_allow_html=True)
             
             st.divider()
 
