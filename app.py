@@ -257,6 +257,7 @@ if password == "1234":
 # --- 1. لوحة التحكم (Tableau de bord) ---
 # 1. لوحة التحكم
 # 1. لوحة التحكم
+# 1. لوحة التحكم
 if st.session_state.current_page == "Tableau de bord":
     st.subheader("📊 Tableau de bord")
     years_list_db = sorted(df["Année / السنة"].dropna().unique().astype(str).tolist()) if not df.empty else years_list
@@ -269,17 +270,17 @@ if st.session_state.current_page == "Tableau de bord":
         if sel_imm_dash != "Tous":
             df_dash = df_dash[df_dash["Immeuble / الإقامة"] == sel_imm_dash]
         
-        # --- حساب مؤشرات الأداء بناءً على صفحة الاشتراكات والسنة/الإقامة المختارين ---
+        # --- حساب دقيق مبني على PAYE و NON_PAYE الحقيقية في القاعدة ---
         if not df_dash.empty:
             total_appartements = len(df_dash)
-            
-            # حساب إجمالي الأشهر المؤداة مقارنة بإجمالي الأشهر الممكنة للسنة المختارة
             total_months_possible = total_appartements * len(months_cols)
             total_months_paid = 0
             
             for month in months_cols:
                 if month in df_dash.columns:
-                    total_months_paid += df_dash[month].astype(str).str.strip().str.upper().str.contains("PAYE").sum()
+                    # تنظيف النص والتحقق هل يساوي PAYE أو PAYÉ بالضبط
+                    paid_count = df_dash[month].astype(str).str.strip().str.upper().apply(lambda x: 1 if x in ['PAYE', 'PAYÉ'] else 0).sum()
+                    total_months_paid += paid_count
             
             taux_recouvrement_annee = (total_months_paid / total_months_possible * 100) if total_months_possible > 0 else 0
             montant_total_collecte = total_months_paid * 300
