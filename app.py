@@ -353,7 +353,9 @@ elif st.session_state.current_page == "Cotisations":
             # تحويل القيم لرموز للعرض في الـ data_editor
             for month in months_cols:
                 if month in df_display.columns:
-                    df_display[month] = df_display[month].apply(lambda x: '✅ PAYE' if str(x).upper() in ['PAYE', 'PAYÉ'] else '❌ NON_PAYE')
+                    df_display[month] = df_display[month].apply(lambda x: 
+                        '✅ PAYE' if str(x).upper() in ['PAYE', 'PAYÉ'] 
+                        else ('🏛️ SYNDIC' if str(x).upper() == 'SYNDIC' else '❌ NON_PAYE')
 
             edited_df = st.data_editor(
                 df_display,
@@ -362,7 +364,7 @@ elif st.session_state.current_page == "Cotisations":
                 column_config={
                     month: st.column_config.SelectboxColumn(
                         month, 
-                        options=["✅ PAYE", "❌ NON_PAYE"]
+                        options=["✅ PAYE", "❌ NON_PAYE", "🏛️ SYNDIC"] # زدنا خيار السنديك
                     )
                     for month in months_cols if month in df_display.columns
                 },
