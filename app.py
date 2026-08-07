@@ -356,6 +356,7 @@ elif st.session_state.current_page == "Cotisations":
                     df_display[month] = df_display[month].apply(lambda x: 
                         '✅ PAYE' if str(x).upper() in ['PAYE', 'PAYÉ'] 
                         else ('🏛️ SYNDIC' if str(x).upper() == 'SYNDIC' else '❌ NON_PAYE')
+                    )
 
             edited_df = st.data_editor(
                 df_display,
